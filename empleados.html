@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empleados - Intranet RH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --navy: #0d2d4a;
+            --navy2: #163d61;
+            --ink: #16213a;
+            --gold: #c9a84c;
+            --gold2: #e8c97a;
+            --cream: #f8f6f2;
+            --cream2: #f1ede4;
+            --border: #e6e1d6;
+            --text: #16213a;
+            --text2: #6b7280;
+            --red: #b91c1c;
+            --surface: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(13,45,74,0.04), 0 4px 16px rgba(13,45,74,0.05);
+            --shadow-md: 0 8px 28px rgba(13,45,74,0.09);
+            --shadow-lg: 0 16px 48px rgba(13,45,74,0.14);
+            --r: 14px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --success: #1f7a4d;
+            --danger: #b91c1c;
+            --warning: #8a5a00;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--cream); font-family: 'Outfit', sans-serif; color: var(--text); min-height: 100vh; display: flex; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar { width: 260px; background: var(--navy); color: white; height: 100vh; position: fixed; padding: 20px 0; overflow-y: auto; z-index: 100; }
+        .sidebar-brand { padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px; }
+        .sidebar-brand h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--gold); }
+        .sidebar-brand small { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li {
+            padding: 12px 20px; margin: 2px 10px; border-radius: 6px; cursor: pointer;
+            transition: var(--transition); font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.7);
+            border-left: 3px solid transparent;
+        }
+        .sidebar ul li:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar ul li.active { background: rgba(255,255,255,0.08); color: white; font-weight: 600; border-left: 3px solid var(--gold); }
+        .sidebar ul li i { width: 20px; text-align: center; font-size: 16px; }
+        .sidebar .group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); padding: 14px 20px 4px; font-weight: 600; }
+
+        .main-content { margin-left: 260px; padding: 24px 32px 60px; width: 100%; min-height: 100vh; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .top-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--ink); }
+
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; box-shadow: var(--shadow-sm); }
+        .stat-card .value { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1; }
+        .stat-card .label { font-size: 11px; color: var(--text2); margin-top: 6px; }
+
+        .table-container { background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); padding: 20px; box-shadow: var(--shadow-sm); overflow-x: auto; }
+        .table-container h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--ink); margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        table th { background: var(--ink); color: white; padding: 10px 14px; text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        table td { padding: 10px 14px; border-bottom: 1px solid var(--cream2); font-size: 13px; }
+        table tr:hover { background: var(--cream2); }
+
+        .btn { padding: 8px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary { background: var(--ink); color: white; }
+        .btn-primary:hover { background: var(--navy2); }
+        .btn-gold { background: var(--gold); color: var(--navy); }
+        .btn-gold:hover { background: var(--gold2); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #9a1717; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
+        .btn-ghost { background: transparent; color: var(--text2); border: 1.5px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+
+        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+        .toolbar .search-box { padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; min-width: 200px; transition: var(--transition); }
+        .toolbar .search-box:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
+
+        .badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-info { background: #e1eefc; color: #1d4ed8; }
+        .badge-muted { background: var(--cream2); color: var(--text2); }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text2); }
+        .empty-state i { font-size: 48px; color: var(--border); margin-bottom: 16px; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,20,35,0.5); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-overlay.visible { display: flex; }
+        .modal { background: white; padding: 32px; border-radius: var(--r); max-width: 560px; width: 92%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+        .modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--ink); margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-weight: 600; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+            font-size: 14px; font-family: 'Outfit', sans-serif; transition: var(--transition);
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+        .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--ink); color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); display: flex; align-items: center; gap: 10px; min-width: 240px; animation: slideIn 0.2s ease; }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        .toast.warning { background: var(--warning); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+        @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .form-row { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .sidebar { width: 60px; padding: 10px 0; }
+            .sidebar-brand h2, .sidebar-brand small, .group-label { display: none; }
+            .sidebar ul li span { display: none; }
+            .sidebar ul li { padding: 12px; justify-content: center; }
+            .main-content { margin-left: 60px; padding: 16px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <h2>🏥 Saint Luke's</h2>
+        <small>Recursos Humanos</small>
+    </div>
+    <ul>
+        <li onclick="window.location.href='index.html'"><i class="fas fa-house"></i><span>Inicio</span></li>
+    </ul>
+    <div class="group-label">Personas</div>
+    <ul>
+        <li class="active"><i class="fas fa-id-card"></i><span>Gestión de Empleados</span></li>
+    </ul>
+    <div class="group-label">Operación</div>
+    <ul>
+        <li onclick="window.location.href='solicitudes.html'"><i class="fas fa-clipboard-list"></i><span>Solicitudes</span></li>
+        <li onclick="window.location.href='vacantes.html'"><i class="fas fa-briefcase"></i><span>Vacantes</span></li>
+        <li onclick="window.location.href='index.html#sec-documentos'"><i class="fas fa-file-pdf"></i><span>Generador de Constancias</span></li>
+    </ul>
+    <div class="group-label">Recursos</div>
+    <ul>
+        <li onclick="window.location.href='buscador.html'"><i class="fas fa-magnifying-glass"></i><span>Buscador de Plataformas</span></li>
+    </ul>
+    <div class="group-label">Carpetas Drive</div>
+    <ul>
+        <li onclick="window.open('https://drive.google.com/drive/folders/162WsQDmoJyw_KtXfJdJO56NtP5QYP9vF', '_blank')"><i class="fas fa-file-contract"></i><span>Políticas RH</span></li>
+        <li onclick="window.open('https://drive.google.com/drive/folders/1QuvZgP1UMWcDTE1XXqtSCXLtWXVOj4ac', '_blank')"><i class="fas fa-users"></i><span>Personal RH</span></li>
+        <li onclick="window.open('https://drive.google.com/drive/folders/1G4Wro-mFDFhKbS0Vu4GCgAmNhm8d2tgv', '_blank')"><i class="fas fa-chart-line"></i><span>Evaluaciones</span></li>
+        <li onclick="window.open('https://drive.google.com/drive/folders/10xAS1MbyFwXPzfRO1Aq8W_zFJSsIRVws', '_blank')"><i class="fas fa-calendar-alt"></i><span>Coberturas y Turnos</span></li>
+        <li onclick="window.open('https://drive.google.com/drive/folders/1V_UsbW1G6juz8nJf5jMEF5LraeGQvorg', '_blank')"><i class="fas fa-folder-open"></i><span>Documentos y Formatos</span></li>
+        <li onclick="window.open('https://drive.google.com/drive/folders/1TCw3VqBT5eQ7cuxj6ivSqNIBzQeCRicz', '_blank')"><i class="fas fa-clipboard-list"></i><span>Operación y Control</span></li>
+        <li onclick="window.open('https://drive.google.com/open?id=1CYm9PHEaDIUOpC2Rm3YoKqUivlGtUjIB', '_blank')"><i class="fas fa-calendar-check"></i><span>Calendarios</span></li>
+    </ul>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+    <div class="top-header">
+        <h1>👥 Gestión de Empleados</h1>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card"><div class="value" id="statTotal">0</div><div class="label">Plantilla total</div></div>
+        <div class="stat-card"><div class="value" id="statActivos">0</div><div class="label">Activos</div></div>
+        <div class="stat-card"><div class="value" id="statDeptos">0</div><div class="label">Departamentos</div></div>
+        <div class="stat-card"><div class="value" id="statSedes">0</div><div class="label">Sedes</div></div>
+    </div>
+
+    <div class="toolbar">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-gold" onclick="mostrarModalEmpleado()"><i class="fas fa-plus"></i> Agregar Empleado</button>
+            <button class="btn btn-primary" onclick="cargarEmpleados()"><i class="fas fa-sync"></i> Actualizar</button>
+        </div>
+        <input type="text" class="search-box" id="searchEmpleados" placeholder="🔍 Buscar empleado..." oninput="filtrarEmpleados()">
+    </div>
+
+    <div class="table-container">
+        <h3>Directorio de Empleados</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:90px;">ID</th>
+                        <th>Nombre</th>
+                        <th>Puesto</th>
+                        <th>Departamento</th>
+                        <th>Sede</th>
+                        <th>Correo</th>
+                        <th style="width:140px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="empleadosList">
+                    <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">⏳ Cargando empleados...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL EMPLEADO ===== -->
+<div class="modal-overlay" id="modalEmpleado">
+    <div class="modal">
+        <h3 id="modalTitle">➕ Agregar Empleado</h3>
+        <form id="empleadoForm">
+            <input type="hidden" id="empleadoId" value="">
+            <div class="form-row">
+                <div class="form-group"><label>Nombre *</label><input type="text" id="empNombre" placeholder="Ej. Juan" required></div>
+                <div class="form-group"><label>Apellido *</label><input type="text" id="empApellido" placeholder="Ej. Pérez" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Puesto *</label><input type="text" id="empPuesto" placeholder="Ej. Paramédico" required></div>
+                <div class="form-group">
+                    <label>Departamento *</label>
+                    <select id="empDepartamento" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Administración">Administración</option>
+                        <option value="Dirección">Dirección</option>
+                        <option value="Enfermería">Enfermería</option>
+                        <option value="Médico">Médico</option>
+                        <option value="Paramédico">Paramédico</option>
+                        <option value="Recursos Humanos">Recursos Humanos</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Sede *</label>
+                    <select id="empSede" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="San José del Cabo">San José del Cabo</option>
+                        <option value="Cabo San Lucas / Pioneros">Cabo San Lucas / Pioneros</option>
+                        <option value="Puerto Rico">Puerto Rico</option>
+                        <option value="Guayabitos">Guayabitos</option>
+                        <option value="Otra">Otra</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Correo *</label><input type="email" id="empCorreo" placeholder="Ej. juan.perez@email.com" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Teléfono</label><input type="tel" id="empTelefono" placeholder="Ej. 624 123 4567"></div>
+                <div class="form-group"><label>Fecha de ingreso</label><input type="date" id="empFechaIngreso"></div>
+            </div>
+            <div class="form-group"><label>Fecha de nacimiento</label><input type="date" id="empFechaNacimiento"></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-ghost" onclick="cerrarModalEmpleado()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="empleadoSubmitBtn">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    // ⚠️ Pega aquí la URL /exec de tu implementación de Codigo_Empleados.gs
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXHdQ2opWlh_UD1qjMdaNBdJSpnJb9NHqvDHX-WYIFXfdUvmVYMKNrDyTM6qxX0nFe/exec';
+
+    let todosLosEmpleados = [];
+
+    function mostrarToast(mensaje, tipo = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${tipo}`;
+        const iconos = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        toast.innerHTML = `<i class="fas ${iconos[tipo] || iconos.info}"></i><span>${mensaje}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 200); }, 3500);
+    }
+
+    async function apiGet(action) {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=${action}`);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error desconocido');
+        return json.data;
+    }
+
+    async function apiPost(payload) {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error desconocido');
+        return json.data;
+    }
+
+    async function cargarEmpleados() {
+        const tbody = document.getElementById('empleadosList');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text2);">⏳ Cargando empleados...</td></tr>';
+
+        try {
+            todosLosEmpleados = await apiGet('listarEmpleados');
+            actualizarStats();
+            renderTabla();
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--red);">❌ Error: ${error.message}</td></tr>`;
+            mostrarToast('Error al cargar empleados', 'error');
+        }
+    }
+
+    function actualizarStats() {
+        document.getElementById('statTotal').textContent = todosLosEmpleados.length;
+        document.getElementById('statActivos').textContent = todosLosEmpleados.filter(e => (e.Estatus || 'Activo') === 'Activo').length;
+        document.getElementById('statDeptos').textContent = new Set(todosLosEmpleados.map(e => e.Departamento).filter(Boolean)).size;
+        document.getElementById('statSedes').textContent = new Set(todosLosEmpleados.map(e => e.Sede).filter(Boolean)).size;
+    }
+
+    function renderTabla() {
+        const tbody = document.getElementById('empleadosList');
+        const busqueda = (document.getElementById('searchEmpleados').value || '').toLowerCase();
+
+        const filtrados = todosLosEmpleados.filter(e => {
+            const texto = `${e.Nombre} ${e.Apellido} ${e.Puesto} ${e.Departamento} ${e.Sede} ${e.Correo}`.toLowerCase();
+            return texto.includes(busqueda);
+        });
+
+        if (filtrados.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7">
+                <div class="empty-state">
+                    <i class="fas fa-users"></i>
+                    <p>${todosLosEmpleados.length === 0 ? 'No hay empleados registrados' : 'Ningún empleado coincide con tu búsqueda'}</p>
+                    ${todosLosEmpleados.length === 0 ? `<button class="btn btn-gold" onclick="mostrarModalEmpleado()" style="margin-top:12px;"><i class="fas fa-plus"></i> Agregar primer empleado</button>` : ''}
+                </div>
+            </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtrados.map(e => `
+            <tr>
+                <td><strong>${e.ID || 'N/A'}</strong></td>
+                <td>${e.Nombre || ''} ${e.Apellido || ''}</td>
+                <td>${e.Puesto || 'N/A'}</td>
+                <td><span class="badge badge-info">${e.Departamento || 'N/A'}</span></td>
+                <td><span class="badge badge-muted">${e.Sede || 'N/A'}</span></td>
+                <td>${e.Correo ? `<a href="mailto:${e.Correo}" style="color:var(--navy);text-decoration:none;">${e.Correo}</a>` : 'N/A'}</td>
+                <td>
+                    <button class="btn btn-gold btn-sm" onclick="editarEmpleado('${e.ID}')" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="eliminarEmpleado('${e.ID}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function filtrarEmpleados() { renderTabla(); }
+
+    function mostrarModalEmpleado() {
+        document.getElementById('modalTitle').textContent = '➕ Agregar Empleado';
+        document.getElementById('empleadoSubmitBtn').textContent = 'Guardar';
+        document.getElementById('empleadoForm').reset();
+        document.getElementById('empleadoId').value = '';
+        document.getElementById('modalEmpleado').classList.add('visible');
+    }
+
+    function editarEmpleado(id) {
+        const e = todosLosEmpleados.find(x => x.ID === id);
+        if (!e) return mostrarToast('Empleado no encontrado', 'error');
+        document.getElementById('modalTitle').textContent = '✏️ Editar Empleado';
+        document.getElementById('empleadoSubmitBtn').textContent = 'Guardar Cambios';
+        document.getElementById('empleadoId').value = e.ID;
+        document.getElementById('empNombre').value = e.Nombre || '';
+        document.getElementById('empApellido').value = e.Apellido || '';
+        document.getElementById('empPuesto').value = e.Puesto || '';
+        document.getElementById('empDepartamento').value = e.Departamento || '';
+        document.getElementById('empSede').value = e.Sede || '';
+        document.getElementById('empCorreo').value = e.Correo || '';
+        document.getElementById('empTelefono').value = e.Telefono || '';
+        document.getElementById('empFechaIngreso').value = e.FechaIngreso || '';
+        document.getElementById('empFechaNacimiento').value = e.FechaNacimiento || '';
+        document.getElementById('modalEmpleado').classList.add('visible');
+    }
+
+    function cerrarModalEmpleado() { document.getElementById('modalEmpleado').classList.remove('visible'); }
+
+    document.getElementById('modalEmpleado').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) cerrarModalEmpleado();
+    });
+
+    document.getElementById('empleadoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const idExistente = document.getElementById('empleadoId').value;
+        const payload = {
+            nombre: document.getElementById('empNombre').value.trim(),
+            apellido: document.getElementById('empApellido').value.trim(),
+            puesto: document.getElementById('empPuesto').value.trim(),
+            departamento: document.getElementById('empDepartamento').value,
+            sede: document.getElementById('empSede').value,
+            correo: document.getElementById('empCorreo').value.trim(),
+            telefono: document.getElementById('empTelefono').value.trim(),
+            fechaIngreso: document.getElementById('empFechaIngreso').value,
+            fechaNacimiento: document.getElementById('empFechaNacimiento').value
+        };
+
+        if (!payload.nombre || !payload.apellido || !payload.puesto || !payload.departamento || !payload.sede || !payload.correo) {
+            mostrarToast('Completa todos los campos obligatorios', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('empleadoSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Guardando...';
+
+        try {
+            if (idExistente) {
+                await apiPost({ action: 'editarEmpleado', id: idExistente, ...payload });
+                mostrarToast('Empleado actualizado', 'success');
+            } else {
+                await apiPost({ action: 'crearEmpleado', ...payload });
+                mostrarToast('Empleado agregado', 'success');
+            }
+            cerrarModalEmpleado();
+            cargarEmpleados();
+        } catch (error) {
+            mostrarToast('Error al guardar: ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = idExistente ? 'Guardar Cambios' : 'Guardar';
+        }
+    });
+
+    async function eliminarEmpleado(id) {
+        const emp = todosLosEmpleados.find(e => e.ID === id);
+        const nombre = emp ? `${emp.Nombre} ${emp.Apellido}` : 'este empleado';
+        if (!confirm(`¿Eliminar a ${nombre} de forma permanente?`)) return;
+        try {
+            await apiPost({ action: 'eliminarEmpleado', id });
+            mostrarToast('Empleado eliminado', 'success');
+            cargarEmpleados();
+        } catch (error) {
+            mostrarToast('Error: ' + error.message, 'error');
+        }
+    }
+
+    cargarEmpleados();
+</script>
+</body>
+</html>

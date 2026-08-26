@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacantes - Intranet RH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ============================================================
+           SISTEMA VISUAL v2 — Portal RH Saint Luke's
+           Más editorial y minimalista, manteniendo navy/gold como
+           acento en vez de bloque de color. Usar estas variables en
+           todos los módulos del portal para mantener consistencia.
+           ============================================================ */
+        :root {
+            --navy: #0d2d4a;
+            --navy2: #163d61;
+            --ink: #16213a;
+            --gold: #c9a84c;
+            --gold2: #e8c97a;
+            --cream: #f8f6f2;
+            --cream2: #f1ede4;
+            --border: #e6e1d6;
+            --text: #16213a;
+            --text2: #6b7280;
+            --surface: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(13,45,74,0.04), 0 4px 16px rgba(13,45,74,0.05);
+            --shadow-md: 0 8px 28px rgba(13,45,74,0.09);
+            --shadow-lg: 0 16px 48px rgba(13,45,74,0.14);
+            --r: 14px;
+            --r-sm: 8px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --green: #1f7a4d; --green-bg: #dcf5e5;
+            --amber: #8a5a00; --amber-bg: #fff2d6;
+            --blue: #1d4ed8; --blue-bg: #e1eefc;
+            --red: #b91c1c; --red-bg: #fde2e2;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--cream);
+            font-family: 'Outfit', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 264px;
+            background: var(--navy);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 24px 0;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .sidebar-brand { padding: 0 24px 22px; margin-bottom: 8px; }
+        .sidebar-brand .mark {
+            width: 34px; height: 34px; border-radius: 9px;
+            background: var(--gold); color: var(--navy);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .sidebar-brand h2 { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 600; color: white; }
+        .sidebar-brand small { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; }
+
+        .sidebar .group-label {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+            color: rgba(255,255,255,0.35); padding: 18px 24px 8px; font-weight: 600;
+        }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li {
+            padding: 10px 24px; margin: 1px 12px; border-radius: var(--r-sm); cursor: pointer;
+            transition: var(--transition); font-size: 13.5px; font-weight: 500;
+            display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.65);
+            border-left: 3px solid transparent;
+        }
+        .sidebar ul li:hover { background: rgba(255,255,255,0.06); color: white; }
+        .sidebar ul li.active {
+            background: rgba(255,255,255,0.08); color: white; font-weight: 600;
+            border-left: 3px solid var(--gold);
+        }
+        .sidebar ul li i { width: 18px; text-align: center; font-size: 14px; }
+
+        /* ===== MAIN ===== */
+        .main-content { margin-left: 264px; padding: 32px 40px 60px; width: 100%; min-height: 100vh; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; }
+        .top-header .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); font-weight: 600; margin-bottom: 6px; }
+        .top-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; color: var(--ink); }
+        .top-header p { color: var(--text2); font-size: 14px; margin-top: 4px; }
+
+        /* ===== STATS ===== */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+        .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+        .stat-card .value { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 700; color: var(--ink); line-height: 1; }
+        .stat-card .label { font-size: 11.5px; color: var(--text2); margin-top: 6px; }
+
+        /* ===== TOOLBAR / FILTERS ===== */
+        .toolbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+        .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-btn {
+            padding: 7px 16px; border: 1.5px solid var(--border); border-radius: 20px;
+            background: white; cursor: pointer; font-size: 12.5px; font-weight: 500; transition: var(--transition); color: var(--text2);
+        }
+        .filter-btn:hover { border-color: var(--gold); color: var(--ink); }
+        .filter-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+        .search-box {
+            padding: 9px 16px; border: 1.5px solid var(--border); border-radius: var(--r-sm);
+            font-size: 13px; min-width: 220px; font-family: 'Outfit', sans-serif; transition: var(--transition);
+        }
+        .search-box:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15); }
+
+        .btn {
+            padding: 9px 18px; border: none; border-radius: var(--r-sm); cursor: pointer;
+            font-size: 13px; font-weight: 600; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 7px;
+        }
+        .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-primary { background: var(--ink); color: white; }
+        .btn-primary:hover { background: var(--navy2); }
+        .btn-ghost { background: transparent; color: var(--text2); border: 1.5px solid var(--border); }
+        .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+        .btn-sm { padding: 5px 11px; font-size: 11px; }
+
+        /* ===== VACANTE CARDS ===== */
+        .vacante-grid { display: flex; flex-direction: column; gap: 12px; }
+        .vacante-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+            padding: 22px 24px; box-shadow: var(--shadow-sm); transition: var(--transition);
+            display: flex; justify-content: space-between; gap: 20px; align-items: flex-start; flex-wrap: wrap;
+        }
+        .vacante-card:hover { box-shadow: var(--shadow-md); }
+        .vacante-card .info { flex: 1; min-width: 260px; }
+        .vacante-card .titulo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+        .vacante-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 600; color: var(--ink); }
+        .vacante-card .meta { font-size: 12.5px; color: var(--text2); margin-bottom: 8px; }
+        .vacante-card .descripcion { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 10px; max-width: 620px; }
+        .vacante-card .footer-meta { font-size: 11.5px; color: var(--text2); display: flex; gap: 16px; }
+        .vacante-card .side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 170px; }
+
+        .pill {
+            display: inline-block; padding: 3px 12px; border-radius: 20px;
+            font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .pill-abierta { background: var(--green-bg); color: var(--green); }
+        .pill-finalistas { background: var(--blue-bg); color: var(--blue); }
+        .pill-pausada { background: var(--amber-bg); color: var(--amber); }
+        .pill-cubierta { background: var(--cream2); color: var(--text2); }
+
+        .estado-select {
+            padding: 7px 12px; border-radius: var(--r-sm); border: 1.5px solid var(--border);
+            font-size: 12.5px; font-weight: 500; font-family: 'Outfit', sans-serif; background: white;
+            cursor: pointer; min-width: 150px;
+        }
+        .estado-select:focus { outline: none; border-color: var(--gold); }
+
+        .card-actions { display: flex; gap: 6px; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text2); }
+        .empty-state i { font-size: 44px; color: var(--border); margin-bottom: 14px; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(13,20,35,0.5); z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal {
+            background: white; padding: 32px; border-radius: var(--r); max-width: 560px; width: 92%;
+            max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+        .modal h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--ink); margin-bottom: 20px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-weight: 600; font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--r-sm);
+            font-size: 14px; font-family: 'Outfit', sans-serif; transition: var(--transition);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+        /* ===== TOASTS ===== */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: var(--ink); color: white; padding: 12px 20px; border-radius: var(--r-sm);
+            font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md);
+            display: flex; align-items: center; gap: 10px; min-width: 240px; animation: slideIn 0.2s ease;
+        }
+        .toast.success { background: var(--green); }
+        .toast.error { background: var(--red); }
+        .toast.warning { background: var(--amber); }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
+
+        @media (max-width: 900px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .form-row { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .sidebar { width: 64px; padding: 16px 0; }
+            .sidebar-brand h2, .sidebar-brand small, .sidebar .group-label, .sidebar ul li span { display: none; }
+            .sidebar ul li { padding: 12px; justify-content: center; margin: 1px 8px; }
+            .main-content { margin-left: 64px; padding: 20px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .vacante-card { flex-direction: column; }
+            .vacante-card .side { align-items: flex-start; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="mark">SL</div>
+        <h2>Saint Luke's</h2>
+        <small>Recursos Humanos</small>
+    </div>
+    <div class="group-label">Personas</div>
+    <ul>
+        <li onclick="window.location.href='index.html'"><i class="fas fa-house"></i><span>Inicio</span></li>
+        <li onclick="window.location.href='empleados.html'"><i class="fas fa-id-card"></i><span>Gestión de Empleados</span></li>
+    </ul>
+    <div class="group-label">Operación</div>
+    <ul>
+        <li onclick="window.location.href='solicitudes.html'"><i class="fas fa-clipboard-list"></i><span>Solicitudes</span></li>
+        <li class="active"><i class="fas fa-briefcase"></i><span>Vacantes</span></li>
+        <li onclick="window.location.href='index.html#sec-documentos'"><i class="fas fa-file-pdf"></i><span>Generador de Constancias</span></li>
+    </ul>
+    <div class="group-label">Recursos</div>
+    <ul>
+        <li onclick="window.location.href='buscador.html'"><i class="fas fa-magnifying-glass"></i><span>Buscador de Plataformas</span></li>
+    </ul>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main-content">
+    <div class="top-header">
+        <div>
+            <div class="eyebrow">Reclutamiento y selección</div>
+            <h1>Vacantes</h1>
+            <p id="subtitleCount">Cargando procesos activos...</p>
+        </div>
+        <button class="btn btn-primary" onclick="mostrarModalVacante()"><i class="fas fa-plus"></i> Nueva Vacante</button>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card"><div class="value" id="statTotal">0</div><div class="label">Procesos totales</div></div>
+        <div class="stat-card"><div class="value" id="statAbierta">0</div><div class="label">Abiertas</div></div>
+        <div class="stat-card"><div class="value" id="statFinalistas">0</div><div class="label">En finalistas</div></div>
+        <div class="stat-card"><div class="value" id="statCubierta">0</div><div class="label">Cubiertas</div></div>
+    </div>
+
+    <div class="toolbar">
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filtro="todas" onclick="filtrarPorEstado('todas', this)">Todas</button>
+            <button class="filter-btn" data-filtro="Abierta" onclick="filtrarPorEstado('Abierta', this)">Abiertas</button>
+            <button class="filter-btn" data-filtro="Finalistas" onclick="filtrarPorEstado('Finalistas', this)">Finalistas</button>
+            <button class="filter-btn" data-filtro="Pausada" onclick="filtrarPorEstado('Pausada', this)">Pausadas</button>
+            <button class="filter-btn" data-filtro="Cubierta" onclick="filtrarPorEstado('Cubierta', this)">Cubiertas</button>
+        </div>
+        <input type="text" class="search-box" id="searchInput" placeholder="🔍 Buscar puesto, sede o departamento..." oninput="renderVacantes()">
+    </div>
+
+    <div class="vacante-grid" id="vacanteGrid">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando vacantes...</p></div>
+    </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalVacante">
+    <div class="modal">
+        <h3 id="modalTitulo">💼 Nueva Vacante</h3>
+        <form id="vacanteForm">
+            <input type="hidden" id="vacanteId" value="">
+            <div class="form-group">
+                <label>Puesto *</label>
+                <input type="text" id="vPuesto" placeholder="Ej. Técnico Radiólogo" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Departamento *</label>
+                    <input type="text" id="vDepartamento" placeholder="Ej. Imagenología" required>
+                </div>
+                <div class="form-group">
+                    <label>Sede *</label>
+                    <select id="vSede" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="San José del Cabo">San José del Cabo</option>
+                        <option value="Cabo San Lucas / Pioneros">Cabo San Lucas / Pioneros</option>
+                        <option value="Puerto Rico">Puerto Rico</option>
+                        <option value="Guayabitos">Guayabitos</option>
+                        <option value="Otra">Otra</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tipo de contrato *</label>
+                    <select id="vTipo" required>
+                        <option value="Indefinido">Indefinido</option>
+                        <option value="Temporal">Temporal</option>
+                        <option value="Por obra">Por obra</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Plazas *</label>
+                    <input type="number" id="vPlazas" min="1" value="1" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="vDescripcion" placeholder="Breve descripción del puesto, responsabilidades clave..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-ghost" onclick="cerrarModalVacante()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="vacanteSubmitBtn">Publicar Vacante</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyHJeOD7ASl-8zxJJJ2lPQL4x2pQclHnrd1QnIzKWqW2cF3fykPs_jSfS43bOytaD8p/exec';
+
+    let todasLasVacantes = [];
+    let filtroActual = 'todas';
+
+    function mostrarToast(mensaje, tipo = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${tipo}`;
+        const iconos = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        toast.innerHTML = `<i class="fas ${iconos[tipo] || iconos.info}"></i><span>${mensaje}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 200); }, 3500);
+    }
+
+    async function apiGet(action) {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=${action}`);
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error desconocido');
+        return json.data;
+    }
+
+    async function apiPost(payload) {
+        const res = await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.error || 'Error desconocido');
+        return json.data;
+    }
+
+    async function cargarVacantes() {
+        const grid = document.getElementById('vacanteGrid');
+        try {
+            todasLasVacantes = await apiGet('listarVacantes');
+            actualizarStats();
+            renderVacantes();
+        } catch (error) {
+            grid.innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>Error al cargar: ${error.message}</p></div>`;
+            mostrarToast('Error al cargar vacantes', 'error');
+        }
+    }
+
+    function actualizarStats() {
+        document.getElementById('statTotal').textContent = todasLasVacantes.length;
+        document.getElementById('statAbierta').textContent = todasLasVacantes.filter(v => v.Estado === 'Abierta').length;
+        document.getElementById('statFinalistas').textContent = todasLasVacantes.filter(v => v.Estado === 'Finalistas').length;
+        document.getElementById('statCubierta').textContent = todasLasVacantes.filter(v => v.Estado === 'Cubierta').length;
+        const activas = todasLasVacantes.filter(v => v.Estado !== 'Cubierta').length;
+        document.getElementById('subtitleCount').textContent = `${activas} proceso${activas !== 1 ? 's' : ''} vivo${activas !== 1 ? 's' : ''}. Cambia el estado cuando el pipeline se mueva.`;
+    }
+
+    function filtrarPorEstado(estado, btn) {
+        filtroActual = estado;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderVacantes();
+    }
+
+    function renderVacantes() {
+        const grid = document.getElementById('vacanteGrid');
+        const busqueda = (document.getElementById('searchInput').value || '').toLowerCase();
+
+        const filtradas = todasLasVacantes.filter(v => {
+            const coincideEstado = filtroActual === 'todas' || v.Estado === filtroActual;
+            const texto = `${v.Puesto} ${v.Departamento} ${v.Sede}`.toLowerCase();
+            return coincideEstado && texto.includes(busqueda);
+        });
+
+        if (filtradas.length === 0) {
+            grid.innerHTML = `<div class="empty-state">
+                <i class="fas fa-briefcase"></i>
+                <p>${todasLasVacantes.length === 0 ? 'No hay vacantes registradas todavía' : 'Ninguna vacante coincide con tu búsqueda'}</p>
+                ${todasLasVacantes.length === 0 ? `<button class="btn btn-primary" onclick="mostrarModalVacante()" style="margin-top:14px;"><i class="fas fa-plus"></i> Publicar primera vacante</button>` : ''}
+            </div>`;
+            return;
+        }
+
+        const pillClass = { 'Abierta': 'pill-abierta', 'Finalistas': 'pill-finalistas', 'Pausada': 'pill-pausada', 'Cubierta': 'pill-cubierta' };
+
+        grid.innerHTML = filtradas.map(v => `
+            <div class="vacante-card">
+                <div class="info">
+                    <div class="titulo-row">
+                        <h3>${v.Puesto}</h3>
+                        <span class="pill ${pillClass[v.Estado] || 'pill-abierta'}">${v.Estado}</span>
+                    </div>
+                    <div class="meta">${v.Departamento} · ${v.Sede} · ${v.Tipo} · ${v.Plazas} plaza${Number(v.Plazas) !== 1 ? 's' : ''}</div>
+                    ${v.Descripcion ? `<div class="descripcion">${v.Descripcion}</div>` : ''}
+                    <div class="footer-meta">
+                        <span><i class="fas fa-calendar"></i> Publicada ${v.FechaPublicacion || 'N/A'}</span>
+                        <span><i class="fas fa-users"></i> ${v.Postulaciones || 0} postulaciones</span>
+                    </div>
+                </div>
+                <div class="side">
+                    <select class="estado-select" onchange="cambiarEstado('${v.ID}', this.value)">
+                        <option value="Abierta" ${v.Estado === 'Abierta' ? 'selected' : ''}>Abierta</option>
+                        <option value="Finalistas" ${v.Estado === 'Finalistas' ? 'selected' : ''}>Finalistas</option>
+                        <option value="Pausada" ${v.Estado === 'Pausada' ? 'selected' : ''}>Pausada</option>
+                        <option value="Cubierta" ${v.Estado === 'Cubierta' ? 'selected' : ''}>Cubierta</option>
+                    </select>
+                    <div class="card-actions">
+                        <button class="btn btn-ghost btn-sm" onclick="editarVacante('${v.ID}')" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="btn btn-ghost btn-sm" onclick="eliminarVacante('${v.ID}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function cambiarEstado(id, estado) {
+        try {
+            await apiPost({ action: 'actualizarEstado', id, estado });
+            mostrarToast(`Estado actualizado a "${estado}"`, 'success');
+            cargarVacantes();
+        } catch (error) {
+            mostrarToast('Error: ' + error.message, 'error');
+        }
+    }
+
+    function mostrarModalVacante() {
+        document.getElementById('modalTitulo').textContent = '💼 Nueva Vacante';
+        document.getElementById('vacanteSubmitBtn').textContent = 'Publicar Vacante';
+        document.getElementById('vacanteForm').reset();
+        document.getElementById('vacanteId').value = '';
+        document.getElementById('modalVacante').classList.add('visible');
+    }
+
+    function editarVacante(id) {
+        const v = todasLasVacantes.find(x => x.ID === id);
+        if (!v) return mostrarToast('Vacante no encontrada', 'error');
+        document.getElementById('modalTitulo').textContent = '✏️ Editar Vacante';
+        document.getElementById('vacanteSubmitBtn').textContent = 'Guardar Cambios';
+        document.getElementById('vacanteId').value = v.ID;
+        document.getElementById('vPuesto').value = v.Puesto;
+        document.getElementById('vDepartamento').value = v.Departamento;
+        document.getElementById('vSede').value = v.Sede;
+        document.getElementById('vTipo').value = v.Tipo;
+        document.getElementById('vPlazas').value = v.Plazas;
+        document.getElementById('vDescripcion').value = v.Descripcion || '';
+        document.getElementById('modalVacante').classList.add('visible');
+    }
+
+    function cerrarModalVacante() {
+        document.getElementById('modalVacante').classList.remove('visible');
+    }
+
+    document.getElementById('modalVacante').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) cerrarModalVacante();
+    });
+
+    document.getElementById('vacanteForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const idExistente = document.getElementById('vacanteId').value;
+        const payload = {
+            puesto: document.getElementById('vPuesto').value.trim(),
+            departamento: document.getElementById('vDepartamento').value.trim(),
+            sede: document.getElementById('vSede').value,
+            tipo: document.getElementById('vTipo').value,
+            plazas: Number(document.getElementById('vPlazas').value),
+            descripcion: document.getElementById('vDescripcion').value.trim()
+        };
+
+        if (!payload.puesto || !payload.departamento || !payload.sede || !payload.plazas) {
+            mostrarToast('Completa todos los campos obligatorios', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('vacanteSubmitBtn');
+        btn.disabled = true;
+        btn.textContent = '⏳ Guardando...';
+
+        try {
+            if (idExistente) {
+                await apiPost({ action: 'editarVacante', id: idExistente, ...payload });
+                mostrarToast('Vacante actualizada', 'success');
+            } else {
+                await apiPost({ action: 'crearVacante', ...payload, creadoPor: 'Capital Humano' });
+                mostrarToast('Vacante publicada', 'success');
+            }
+            cerrarModalVacante();
+            cargarVacantes();
+        } catch (error) {
+            mostrarToast('Error al guardar: ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = idExistente ? 'Guardar Cambios' : 'Publicar Vacante';
+        }
+    });
+
+    async function eliminarVacante(id) {
+        if (!confirm('¿Eliminar esta vacante de forma permanente?')) return;
+        try {
+            await apiPost({ action: 'eliminarVacante', id });
+            mostrarToast('Vacante eliminada', 'success');
+            cargarVacantes();
+        } catch (error) {
+            mostrarToast('Error: ' + error.message, 'error');
+        }
+    }
+
+    cargarVacantes();
+</script>
+</body>
+</html>
