@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ausencias - Intranet RH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --navy: #0d2d4a;
+            --navy2: #163d61;
+            --ink: #16213a;
+            --gold: #c9a84c;
+            --gold2: #e8c97a;
+            --cream: #f8f6f2;
+            --cream2: #f1ede4;
+            --border: #e6e1d6;
+            --text: #16213a;
+            --text2: #6b7280;
+            --surface: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(13,45,74,0.04), 0 4px 16px rgba(13,45,74,0.05);
+            --shadow-md: 0 8px 28px rgba(13,45,74,0.09);
+            --r: 14px;
+            --r-sm: 8px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --green: #1f7a4d; --green-bg: #dcf5e5;
+            --amber: #8a5a00; --amber-bg: #fff2d6;
+            --blue: #1d4ed8; --blue-bg: #e1eefc;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--cream); font-family: 'Outfit', sans-serif; color: var(--text); min-height: 100vh; display: flex; -webkit-font-smoothing: antialiased; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar { width: 264px; background: var(--navy); color: white; height: 100vh; position: fixed; padding: 24px 0; overflow-y: auto; z-index: 100; }
+        .sidebar-brand { padding: 0 24px 22px; margin-bottom: 8px; }
+        .sidebar-brand .mark { width: 34px; height: 34px; border-radius: 9px; background: var(--gold); color: var(--navy); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 18px; margin-bottom: 12px; }
+        .sidebar-brand h2 { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 600; color: white; }
+        .sidebar-brand small { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 1px; }
+        .sidebar .group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); padding: 18px 24px 8px; font-weight: 600; }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li { padding: 10px 24px; margin: 1px 12px; border-radius: var(--r-sm); cursor: pointer; transition: var(--transition); font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 12px; color: rgba(255,255,255,0.65); border-left: 3px solid transparent; }
+        .sidebar ul li:hover { background: rgba(255,255,255,0.06); color: white; }
+        .sidebar ul li.active { background: rgba(255,255,255,0.08); color: white; font-weight: 600; border-left: 3px solid var(--gold); }
+        .sidebar ul li i { width: 18px; text-align: center; font-size: 14px; }
+
+        /* ===== MAIN ===== */
+        .main-content { margin-left: 264px; padding: 32px 40px 60px; width: 100%; min-height: 100vh; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; flex-wrap: wrap; gap: 12px; }
+        .top-header .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); font-weight: 600; margin-bottom: 6px; }
+        .top-header h1 { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; color: var(--ink); }
+        .top-header p { color: var(--text2); font-size: 14px; margin-top: 4px; }
+
+        .month-nav { display: flex; align-items: center; gap: 10px; }
+        .month-nav button {
+            width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border); background: white;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink); transition: var(--transition);
+        }
+        .month-nav button:hover { border-color: var(--gold); background: var(--cream2); }
+        .month-nav .month-label { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; color: var(--ink); min-width: 190px; text-align: center; text-transform: capitalize; }
+
+        /* ===== CALENDAR ===== */
+        .calendar-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 24px; box-shadow: var(--shadow-sm); margin: 24px 0; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .calendar-grid .dow { text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); padding-bottom: 8px; }
+        .day-cell {
+            min-height: 84px; border-radius: 10px; border: 1px solid var(--cream2); padding: 8px;
+            display: flex; flex-direction: column; gap: 4px; background: var(--cream); transition: var(--transition);
+        }
+        .day-cell.other-month { opacity: 0.35; }
+        .day-cell.today { border-color: var(--gold); background: #fdf9ef; }
+        .day-cell .day-num { font-size: 12px; font-weight: 700; color: var(--ink); }
+        .day-cell .avatars { display: flex; flex-wrap: wrap; gap: 3px; }
+        .mini-avatar {
+            width: 20px; height: 20px; border-radius: 50%; background: var(--navy); color: white;
+            font-size: 8.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+            cursor: default;
+        }
+        .mini-avatar.overflow { background: var(--cream2); color: var(--text2); }
+
+        /* ===== LIST ===== */
+        .section-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--ink); margin-bottom: 14px; }
+        .ausencia-list { display: flex; flex-direction: column; gap: 10px; }
+        .ausencia-item {
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+            padding: 14px 18px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 14px;
+        }
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--navy); color: white;
+            display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;
+        }
+        .ausencia-item .info { flex: 1; }
+        .ausencia-item .name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+        .ausencia-item .meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+        .pill { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; background: var(--green-bg); color: var(--green); }
+
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text2); }
+        .empty-state i { font-size: 40px; color: var(--border); margin-bottom: 12px; }
+
+        @media (max-width: 900px) {
+            .day-cell { min-height: 60px; }
+            .mini-avatar { display: none; }
+            .day-cell .avatars::after { content: attr(data-count); font-size: 10px; color: var(--text2); }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: 64px; padding: 16px 0; }
+            .sidebar-brand h2, .sidebar-brand small, .sidebar .group-label, .sidebar ul li span { display: none; }
+            .sidebar ul li { padding: 12px; justify-content: center; margin: 1px 8px; }
+            .main-content { margin-left: 64px; padding: 20px; }
+            .calendar-grid .dow:nth-child(n) { font-size: 9px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="mark">SL</div>
+        <h2>Saint Luke's</h2>
+        <small>Recursos Humanos</small>
+    </div>
+    <div class="group-label">Personas</div>
+    <ul>
+        <li onclick="window.location.href='index.html'"><i class="fas fa-house"></i><span>Inicio</span></li>
+        <li onclick="window.location.href='empleados.html'"><i class="fas fa-id-card"></i><span>Gestión de Empleados</span></li>
+    </ul>
+    <div class="group-label">Operación</div>
+    <ul>
+        <li onclick="window.location.href='solicitudes.html'"><i class="fas fa-clipboard-list"></i><span>Solicitudes</span></li>
+        <li class="active"><i class="fas fa-calendar-days"></i><span>Ausencias</span></li>
+        <li onclick="window.location.href='vacantes.html'"><i class="fas fa-briefcase"></i><span>Vacantes</span></li>
+        <li onclick="window.location.href='index.html#sec-documentos'"><i class="fas fa-file-pdf"></i><span>Generador de Constancias</span></li>
+    </ul>
+    <div class="group-label">Recursos</div>
+    <ul>
+        <li onclick="window.location.href='buscador.html'"><i class="fas fa-magnifying-glass"></i><span>Buscador de Plataformas</span></li>
+    </ul>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main-content">
+    <div class="top-header">
+        <div>
+            <div class="eyebrow">Operación</div>
+            <h1>Ausencias</h1>
+            <p>Quién no está en la oficina este mes. Solo se muestran solicitudes ya aprobadas.</p>
+        </div>
+        <div class="month-nav">
+            <button onclick="cambiarMes(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="month-label" id="monthLabel">—</div>
+            <button onclick="cambiarMes(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <div class="calendar-card">
+        <div class="calendar-grid" id="calendarGrid">
+            <div class="dow">Lun</div><div class="dow">Mar</div><div class="dow">Mié</div><div class="dow">Jue</div><div class="dow">Vie</div><div class="dow">Sáb</div><div class="dow">Dom</div>
+        </div>
+    </div>
+
+    <div class="section-title">Ausencias del mes</div>
+    <div class="ausencia-list" id="ausenciaList">
+        <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Cargando...</p></div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ Reutiliza el MISMO backend de Solicitudes — las ausencias son
+    // solicitudes con Estado = "Aprobado"
+    const SOLICITUDES_URL = 'https://script.google.com/macros/s/AKfycbxHarLo2_CtwzIv17BV-IHskTc7oz6Wo3TNNmGLKPbxzZmmg_uN-3z3hLZp1TNSnnEryA/exec';
+
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    let mesActual = new Date().getMonth();
+    let anioActual = new Date().getFullYear();
+    let ausenciasAprobadas = [];
+
+    function iniciales(nombreCompleto) {
+        const partes = (nombreCompleto || '?').trim().split(' ');
+        return `${(partes[0] || '?')[0] || ''}${(partes[1] || '')[0] || ''}`.toUpperCase();
+    }
+
+    async function cargarAusencias() {
+        try {
+            const res = await fetch(`${SOLICITUDES_URL}?action=listarSolicitudes`);
+            const json = await res.json();
+            if (!json.ok) throw new Error(json.error);
+            ausenciasAprobadas = json.data.filter(s => s.Estado === 'Aprobado');
+            render();
+        } catch (error) {
+            document.getElementById('ausenciaList').innerHTML =
+                `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>No se pudo conectar: ${error.message}</p></div>`;
+        }
+    }
+
+    function fechaEnRango(fecha, inicio, fin) {
+        return fecha >= inicio && fecha <= fin;
+    }
+
+    function cambiarMes(delta) {
+        mesActual += delta;
+        if (mesActual < 0) { mesActual = 11; anioActual--; }
+        if (mesActual > 11) { mesActual = 0; anioActual++; }
+        render();
+    }
+
+    function render() {
+        document.getElementById('monthLabel').textContent = `${MESES[mesActual]} ${anioActual}`;
+        renderCalendario();
+        renderLista();
+    }
+
+    function renderCalendario() {
+        const grid = document.getElementById('calendarGrid');
+        grid.innerHTML = `
+            <div class="dow">Lun</div><div class="dow">Mar</div><div class="dow">Mié</div><div class="dow">Jue</div><div class="dow">Vie</div><div class="dow">Sáb</div><div class="dow">Dom</div>
+        `;
+
+        const primerDia = new Date(anioActual, mesActual, 1);
+        const ultimoDia = new Date(anioActual, mesActual + 1, 0);
+        const offsetInicio = (primerDia.getDay() + 6) % 7; // lunes = 0
+        const hoy = new Date();
+        const hoyStr = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+
+        // Días del mes anterior para rellenar
+        for (let i = 0; i < offsetInicio; i++) {
+            const d = new Date(anioActual, mesActual, 1 - (offsetInicio - i));
+            grid.appendChild(crearCelda(d, true, hoyStr));
+        }
+        // Días del mes actual
+        for (let d = 1; d <= ultimoDia.getDate(); d++) {
+            grid.appendChild(crearCelda(new Date(anioActual, mesActual, d), false, hoyStr));
+        }
+        // Rellenar hasta completar semana
+        const totalCeldas = offsetInicio + ultimoDia.getDate();
+        const sobrantes = (7 - (totalCeldas % 7)) % 7;
+        for (let i = 1; i <= sobrantes; i++) {
+            grid.appendChild(crearCelda(new Date(anioActual, mesActual + 1, i), true, hoyStr));
+        }
+    }
+
+    function crearCelda(fecha, otroMes, hoyStr) {
+        const fechaStr = `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,'0')}-${String(fecha.getDate()).padStart(2,'0')}`;
+        const cell = document.createElement('div');
+        cell.className = `day-cell ${otroMes ? 'other-month' : ''} ${fechaStr === hoyStr ? 'today' : ''}`;
+
+        const ausentesHoy = ausenciasAprobadas.filter(a => fechaEnRango(fechaStr, a.FechaInicio, a.FechaFin));
+        const visibles = ausentesHoy.slice(0, 4);
+        const extra = ausentesHoy.length - visibles.length;
+
+        cell.innerHTML = `
+            <div class="day-num">${fecha.getDate()}</div>
+            <div class="avatars" data-count="${ausentesHoy.length > 0 ? ausentesHoy.length + ' fuera' : ''}">
+                ${visibles.map(a => `<div class="mini-avatar" title="${a.EmpleadoNombre} · ${a.Tipo}">${iniciales(a.EmpleadoNombre)}</div>`).join('')}
+                ${extra > 0 ? `<div class="mini-avatar overflow">+${extra}</div>` : ''}
+            </div>
+        `;
+        return cell;
+    }
+
+    function renderLista() {
+        const cont = document.getElementById('ausenciaList');
+        const inicioMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}-01`;
+        const finMes = `${anioActual}-${String(mesActual+1).padStart(2,'0')}-31`;
+
+        const delMes = ausenciasAprobadas
+            .filter(a => a.FechaInicio <= finMes && a.FechaFin >= inicioMes)
+            .sort((a, b) => a.FechaInicio.localeCompare(b.FechaInicio));
+
+        if (delMes.length === 0) {
+            cont.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-check"></i><p>Nadie ausente este mes.</p></div>';
+            return;
+        }
+
+        cont.innerHTML = delMes.map(a => `
+            <div class="ausencia-item">
+                <div class="avatar">${iniciales(a.EmpleadoNombre)}</div>
+                <div class="info">
+                    <div class="name">${a.EmpleadoNombre || 'N/A'}</div>
+                    <div class="meta">${a.Tipo || ''} · ${a.FechaInicio} – ${a.FechaFin}</div>
+                </div>
+                <span class="pill">Aprobada</span>
+            </div>
+        `).join('');
+    }
+
+    cargarAusencias();
+</script>
+</body>
+</html>
