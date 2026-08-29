@@ -135,6 +135,8 @@
     </ul>
     <div class="group-label">Personas</div>
     <ul>
+        <li onclick="window.location.href='directorio.html'"><i class="fas fa-address-book"></i><span>Directorio</span></li>
+        <li onclick="window.location.href='organigrama.html'"><i class="fas fa-sitemap"></i><span>Organigrama</span></li>
         <li class="active"><i class="fas fa-id-card"></i><span>Gestión de Empleados</span></li>
     </ul>
     <div class="group-label">Operación</div>
@@ -249,6 +251,12 @@
                 <div class="form-group"><label>Fecha de ingreso</label><input type="date" id="empFechaIngreso"></div>
             </div>
             <div class="form-group"><label>Fecha de nacimiento</label><input type="date" id="empFechaNacimiento"></div>
+            <div class="form-group">
+                <label>Reporta a</label>
+                <select id="empReportaA">
+                    <option value="">— Sin jefe directo (nivel más alto) —</option>
+                </select>
+            </div>
             <div class="form-actions">
                 <button type="button" class="btn btn-ghost" onclick="cerrarModalEmpleado()">Cancelar</button>
                 <button type="submit" class="btn btn-primary" id="empleadoSubmitBtn">Guardar</button>
@@ -312,6 +320,20 @@
         document.getElementById('statActivos').textContent = todosLosEmpleados.filter(e => (e.Estatus || 'Activo') === 'Activo').length;
         document.getElementById('statDeptos').textContent = new Set(todosLosEmpleados.map(e => e.Departamento).filter(Boolean)).size;
         document.getElementById('statSedes').textContent = new Set(todosLosEmpleados.map(e => e.Sede).filter(Boolean)).size;
+        poblarSelectJefes();
+    }
+
+    function poblarSelectJefes() {
+        const sel = document.getElementById('empReportaA');
+        const actual = sel.value;
+        sel.innerHTML = '<option value="">— Sin jefe directo (nivel más alto) —</option>';
+        todosLosEmpleados.forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.ID;
+            opt.textContent = `${e.Nombre} ${e.Apellido} — ${e.Puesto || ''}`;
+            sel.appendChild(opt);
+        });
+        sel.value = actual;
     }
 
     function renderTabla() {
@@ -375,6 +397,7 @@
         document.getElementById('empTelefono').value = e.Telefono || '';
         document.getElementById('empFechaIngreso').value = e.FechaIngreso || '';
         document.getElementById('empFechaNacimiento').value = e.FechaNacimiento || '';
+        document.getElementById('empReportaA').value = e.ReportaA || '';
         document.getElementById('modalEmpleado').classList.add('visible');
     }
 
@@ -396,7 +419,8 @@
             correo: document.getElementById('empCorreo').value.trim(),
             telefono: document.getElementById('empTelefono').value.trim(),
             fechaIngreso: document.getElementById('empFechaIngreso').value,
-            fechaNacimiento: document.getElementById('empFechaNacimiento').value
+            fechaNacimiento: document.getElementById('empFechaNacimiento').value,
+            reportaA: document.getElementById('empReportaA').value
         };
 
         if (!payload.nombre || !payload.apellido || !payload.puesto || !payload.departamento || !payload.sede || !payload.correo) {
