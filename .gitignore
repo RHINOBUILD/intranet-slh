@@ -1,0 +1,5 @@
+# Identifica el proyecto de Apps Script de cada instalación
+.clasp.json
+.clasprc.json
+node_modules/
+.DS_Store

@@ -1,0 +1,21 @@
+name: Pruebas
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Permisos, guardado, archivos, PDF y NOM-035
+        run: node pruebas/test.js src
+      - name: Mismas pruebas con orden de carga inverso
+        run: REVERSE=1 node pruebas/test.js src
