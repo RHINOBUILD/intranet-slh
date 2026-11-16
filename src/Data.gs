@@ -79,6 +79,16 @@ function appendRow_(table, obj) {
   range.setValues([row]);
 }
 
+/** Agrega varias filas en una sola escritura (importaciones). */
+function appendRows_(table, list) {
+  if (!list.length) return;
+  var sh = sheet_(table);
+  var rows = list.map(function (o) { return toRow_(table, o); });
+  var range = sh.getRange(sh.getLastRow() + 1, 1, rows.length, rows[0].length);
+  range.setNumberFormat('@');
+  range.setValues(rows);
+}
+
 function updateRow_(table, rowIndex, obj) {
   var row = toRow_(table, obj);
   var range = sheet_(table).getRange(rowIndex, 1, 1, row.length);

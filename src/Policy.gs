@@ -13,8 +13,8 @@ const RESTRICTED_KINDS_ = {
   incapacidades: ['Dirección RH', 'Jefatura RH', 'Generalista RH'],
 };
 
-// Campos salariales ocultos a quien no tiene un rol operativo de RH.
-const SENSITIVE_FIELDS_ = { constancias: ['salary', 'salaryPeriod'], candidatos: ['salary'] };
+// Campos sensibles (salario, fecha de nacimiento) ocultos a quien no tiene un rol operativo de RH.
+const SENSITIVE_FIELDS_ = { constancias: ['salary', 'salaryPeriod'], candidatos: ['salary'], colaboradores: ['birthDate'] };
 const SENSITIVE_FIELD_ROLES_ = ['Dirección RH', 'Jefatura RH', 'Generalista RH', 'Reclutamiento'];
 
 // Sedes que agrupan a otras.

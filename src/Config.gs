@@ -113,8 +113,9 @@ const MODULES = [
     states: ['Activo', 'Baja'],
     fields: [
       f_('employeeId', 'Número único de empleado', 'text', true), f_('area', 'Área', 'text', true), f_('position', 'Puesto', 'text', true),
-      f_('manager', 'Jefe inmediato'), f_('start', 'Fecha de ingreso', 'date', true), f_('end', 'Fecha de baja', 'date'),
-      f_('email', 'Correo de contacto'),
+      f_('manager', 'Jefe inmediato'), f_('managerId', 'Número de empleado del jefe inmediato'),
+      f_('start', 'Fecha de ingreso', 'date', true), f_('end', 'Fecha de baja', 'date'),
+      f_('email', 'Correo de contacto'), f_('phone', 'Teléfono / extensión'), f_('birthDate', 'Fecha de nacimiento', 'date'),
       f_('contractType', 'Tipo de relación', 'select', true, ['Tiempo indeterminado', 'Tiempo determinado', 'Servicios profesionales', 'Prácticas']),
       f_('url', 'Carpeta del expediente', 'url'),
     ],

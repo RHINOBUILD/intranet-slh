@@ -164,6 +164,76 @@ const of1 = rec(OWNER, { kind: 'oficios', title: 'Requerimiento IMSS', company: 
 const of2 = rec(OWNER, { kind: 'oficios', title: 'Respuesta IMSS', company: 'Todas las empresas', site: 'Corporativo', status: 'Registrado', payload: { direction: 'Salida', eventDate: '2026-10-12', sender: 'RH', recipient: 'IMSS' } });
 ok(/-0001$/.test(of1.folio) && /-0002$/.test(of2.folio), 'folios consecutivos');
 
+// --- Padrón: jefe inmediato por número de empleado y fecha de nacimiento protegida
+const jefe = rec(OWNER, { kind: 'colaboradores', title: 'Marta Jefa', company: 'Saint Luke’s Hospitals', site: 'San José del Cabo', status: 'Activo',
+  payload: { employeeId: 'SLH-100', area: 'Enfermería', position: 'Jefa de Enfermería', start: '2020-01-01', contractType: 'Tiempo indeterminado', birthDate: '1985-11-20' } });
+throws(() => rec(OWNER, { kind: 'colaboradores', title: 'Sin Jefe', company: 'Saint Luke’s Hospitals', site: 'San José del Cabo', status: 'Activo',
+  payload: { employeeId: 'SLH-101', area: 'A', position: 'P', start: '2024-01-01', contractType: 'Prácticas', managerId: 'NO-EXISTE' } }), /jefe inmediato/, 'jefe inexistente');
+throws(() => rec(OWNER, { kind: 'colaboradores', title: 'Yo Mismo', company: 'Saint Luke’s Hospitals', site: 'San José del Cabo', status: 'Activo',
+  payload: { employeeId: 'SLH-102', area: 'A', position: 'P', start: '2024-01-01', contractType: 'Prácticas', managerId: 'slh-102' } }), /su propio jefe/, 'no es su propio jefe');
+const sub = rec(OWNER, { kind: 'colaboradores', title: 'Luis Enfermero', company: 'Saint Luke’s Hospitals', site: 'San José del Cabo', status: 'Activo',
+  payload: { employeeId: 'SLH-103', area: 'Enfermería', position: 'Enfermero', start: '2024-01-01', contractType: 'Tiempo indeterminado', managerId: 'slh-100' } });
+ok(sub.payload.managerId === 'SLH-100' && sub.payload.manager === 'Marta Jefa', 'jefe vinculado y nombre llenado');
+save(OWNER, { email: 'consulta-sjc@grupo.mx', name: 'Consulta SJC', role: 'Consulta', companies: ['*'], sites: ['San José del Cabo'], active: true });
+const cJefe = env.as('consulta-sjc@grupo.mx').call('apiLoad').records.find((r) => r.id === jefe.id);
+ok(cJefe && cJefe.payload.birthDate === undefined && cJefe.payload.phone !== undefined, 'consulta sin fecha de nacimiento');
+ok(env.as('gen@grupo.mx').call('apiLoad').records.find((r) => r.id === jefe.id).payload.birthDate === '1985-11-20', 'generalista ve cumpleaños');
+
+// --- Importación de la versión anterior
+const D = (y, m, d) => vm0.runInContext(`new Date(${y}, ${m - 1}, ${d})`, env.ctx);
+const vm0 = require('vm');
+const legacy = env.ctx.SpreadsheetApp.create();
+const tab = (name, rows) => { const sh = legacy.insertSheet(name); sh.rows = rows; };
+tab('Empleados', [
+  ['ID', 'Nombre', 'Apellido', 'Puesto', 'Departamento', 'Sede', 'Correo', 'Telefono', 'FechaIngreso', 'FechaNacimiento', 'Estatus', 'ReportaA'],
+  ['emp-1', 'Rosa', 'Directora', 'Directora General', 'Dirección', 'San José del Cabo', 'rosa@x.mx', '624 100', D(2015, 3, 1), '20/11/1970', 'Activo', ''],
+  ['EMP-2', 'Pablo', 'Paramédico', 'Paramédico', 'Paramédico', 'Cabo San Lucas / Pioneros', 'pablo@x.mx', '', '2022-05-10', '', 'Activo', 'EMP-1'],
+  ['EMP-3', 'Iris', 'Isla', 'Enfermera', 'Enfermería', 'Puerto Rico', '', '', '', '', 'Baja', 'EMP-9'],
+  ['SLH-001', 'Ana', 'Duplicada', 'X', 'X', 'San José del Cabo', '', '', '2020-01-01', '', 'Activo', ''],
+  ['', '', '', '', '', '', '', '', '', '', '', ''],
+]);
+tab('Solicitudes', [
+  ['ID', 'EmpleadoID', 'EmpleadoNombre', 'Tipo', 'FechaInicio', 'FechaFin', 'Motivo', 'Estado'],
+  ['SOL-1', 'EMP-2', 'Pablo Paramédico', 'Vacaciones', '2026-12-20', '2026-12-27', 'Fin de año', 'Aprobada'],
+  ['SOL-2', 'EMP-1', 'Rosa Directora', 'Permiso Médico', D(2026, 11, 3), '', 'Consulta', 'Pendiente'],
+  ['SOL-3', 'EMP-1', 'Rosa Directora', 'Viáticos', '', '', 'Sin fecha', 'Pendiente'],
+]);
+tab('Vacantes', [
+  ['ID', 'Puesto', 'Departamento', 'Sede', 'Plazas', 'Tipo', 'Descripcion', 'Estado', 'FechaPublicacion'],
+  ['VAC-1', 'Técnico Radiólogo', 'Imagen', 'San José del Cabo', 2, 'Indefinido', 'Turno nocturno', 'Abierta', '2026-11-01'],
+  ['VAC-2', 'Auxiliar de Almacén', 'Almacén', 'Guayabitos', '', 'Temporal', '', 'Cubierta', ''],
+]);
+const imp = (who, o) => env.as(who).call('apiImportLegacy', Object.assign({ source: 'https://docs.google.com/spreadsheets/d/' + legacy.getId() + '/edit', company: 'Saint Luke’s Hospitals', site: 'San José del Cabo' }, o));
+throws(() => imp('jef@grupo.mx', {}), /titular/, 'solo titular importa');
+throws(() => imp(OWNER, { source: 'hola' }), /enlace/, 'enlace inválido');
+throws(() => imp(OWNER, { source: env.state.props.SPREADSHEET_ID }), /base de datos actual/, 'no importa la base actual');
+const before = env.as(OWNER).call('apiLoad').records.length;
+const dry = imp(OWNER, {});
+ok(!dry.committed && dry.summary.empleados.nuevos === 3 && dry.summary.empleados.omitidos === 1 && dry.summary.solicitudes.nuevos === 2 &&
+  dry.summary.solicitudes.omitidos === 1 && dry.summary.vacantes.nuevos === 2, 'revisión previa ' + JSON.stringify(dry.summary));
+ok(env.as(OWNER).call('apiLoad').records.length === before, 'la revisión no guarda');
+ok(dry.warnings.some((w) => /Puerto Rico/.test(w)) && dry.warnings.some((w) => /SLH-001/.test(w)) && dry.warnings.some((w) => /EMP-9/.test(w)), 'avisos de sede, duplicado y jefe');
+const done = imp(OWNER, { commit: true });
+ok(done.committed && done.total === 7, 'importación');
+const all2 = env.as(OWNER).call('apiLoad').records;
+const pablo = all2.find((r) => r.kind === 'colaboradores' && r.payload.employeeId === 'EMP-2');
+const rosa = all2.find((r) => r.kind === 'colaboradores' && r.payload.employeeId === 'EMP-1');
+ok(rosa && rosa.payload.start === '2015-03-01' && rosa.payload.birthDate === '1970-11-20', 'fechas convertidas');
+ok(pablo.site === 'Cabo San Lucas' && pablo.payload.managerId === 'EMP-1' && pablo.payload.manager === 'Rosa Directora', 'sede y jefe mapeados');
+const iris = all2.find((r) => r.payload.employeeId === 'EMP-3');
+ok(iris.status === 'Baja' && iris.site === 'San José del Cabo' && iris.payload.managerId === '', 'baja con sede por omisión');
+const vac = all2.filter((r) => r.kind === 'cobertura');
+ok(vac.length === 2 && vac.every((v) => /^CV-\d{4}-\d{4}$/.test(v.folio)) && vac.find((v) => v.title === 'Técnico Radiólogo').status === 'En reclutamiento' &&
+  vac.find((v) => v.title === 'Técnico Radiólogo').payload.quantity === '2', 'vacantes con folio');
+const vacs = all2.filter((r) => r.kind === 'permisos' && /Pablo|Rosa/.test(r.title));
+ok(vacs.length === 2 && vacs.find((r) => r.title === 'Pablo Paramédico').status === 'Autorizado' && vacs.find((r) => r.title === 'Pablo Paramédico').payload.employeeRecordId === undefined &&
+  vacs.find((r) => r.title === 'Rosa Directora').payload.reason.startsWith('[Permiso Médico]') && vacs.find((r) => r.title === 'Rosa Directora').due === '2026-11-03', 'solicitudes a permisos');
+// Editar un registro importado conserva su origen, y una segunda importación no duplica
+rec(OWNER, { kind: 'colaboradores', id: pablo.id, revision: pablo.revision, title: pablo.title, company: pablo.company, site: pablo.site, status: 'Activo',
+  payload: Object.assign({}, pablo.payload, { start: '2022-05-10', contractType: 'Tiempo indeterminado', phone: '624 200' }) });
+const again = imp(OWNER, { commit: true });
+ok(again.total === 0 && again.summary.empleados.yaImportados === 3 && again.summary.vacantes.yaImportados === 2, 'reimportar no duplica');
+
 // --- doGet arma la página completa
 const vm = require('vm');
 const html = vm.runInContext('doGet().getContent()', env.ctx);
