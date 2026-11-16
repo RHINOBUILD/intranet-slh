@@ -4,6 +4,10 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 
 ![Pantalla de inicio con datos ficticios](docs/vista-previa.png)
 
+| Plataformas | Directorio | Organigrama |
+|---|---|---|
+| ![Plataformas](docs/plataformas.png) | ![Directorio](docs/directorio.png) | ![Organigrama](docs/organigrama.png) |
+
 > GitHub guarda el código; la plataforma **no se ejecuta en GitHub Pages**. Funciona como aplicación web de Google Apps Script, así que se instala en Google siguiendo los pasos de abajo.
 
 ## Estructura del repositorio
@@ -11,7 +15,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 | Carpeta | Contenido |
 |---|---|
 | `src/` | Los archivos que van a Apps Script (`.gs`, `.html` y `appsscript.json`). |
-| `pruebas/` | Simulador de Apps Script para Node.js, 66 comprobaciones y vista previa local. |
+| `pruebas/` | Simulador de Apps Script para Node.js, 84 comprobaciones y vista previa local. |
 | `docs/` | Capturas. |
 | `.github/workflows/` | Corre las pruebas automáticamente en cada cambio. |
 
@@ -26,7 +30,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 2. En **Configuración del proyecto** (ícono de engrane), activa **Mostrar el archivo de manifiesto "appsscript.json" en el editor**.
 3. En el editor, abre `appsscript.json` y reemplaza su contenido por el de `src/appsscript.json`.
 4. Borra el archivo `Código.gs` y crea estos archivos con el botón **+**, usando exactamente estos nombres. El editor agrega la extensión solo.
-   - **Secuencia de comandos:** `Config`, `Policy`, `Data`, `Nom035`, `Evaluations`, `Pdf`, `Api`
+   - **Secuencia de comandos:** `Config`, `Policy`, `Data`, `Nom035`, `Evaluations`, `Pdf`, `Api`, `Import`, `Platforms`
    - **HTML:** `Index`, `Styles`, `Logos`, `Client`
 
    Pega en cada uno el contenido del archivo con el mismo nombre de la carpeta `src/`. El orden no importa.
@@ -38,6 +42,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
    - Quién tiene acceso: **Cualquier usuario de [tu dominio]**
 7. Copia la URL de la aplicación web y ábrela. Entras como titular (Dirección RH, todas las empresas y sedes).
 8. En **Usuarios y permisos**, agrega al equipo con su correo corporativo, rol, empresas y sedes.
+9. (Opcional) En la misma pantalla, en **Importar datos de la versión anterior**, pega el enlace de la hoja de la intranet anterior (pestañas Empleados, Solicitudes y Vacantes), elige empresa y sede por omisión y pulsa **Revisar**. Verás cuántos registros entran y los avisos; si todo está bien, pulsa **Importar**. Ver "Importación" abajo.
 
 ### Alternativa: instalar con clasp
 
@@ -82,7 +87,7 @@ Edita los archivos en el editor (o en `src/` y luego `clasp push`) y después **
 | Generalista RH | Módulos de su alcance, incluidas incapacidades. No ve evaluaciones individuales. |
 | Reclutamiento | Candidatos, cobertura de vacantes, perfiles de puesto y procesos. |
 | Capacitación | Calendario de capacitaciones y procesos. |
-| Consulta | Solo lectura y descarga. No ve salarios, incapacidades ni evaluaciones. |
+| Consulta | Solo lectura y descarga. No ve salarios, fechas de nacimiento, incapacidades ni evaluaciones. |
 
 Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la sede agrupadora ve y edita sus sedes. Quien tiene una sede miembro, como Cancún, ve sin editar lo registrado como "Caribe".
 
@@ -91,6 +96,11 @@ Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la s
 **Igual:** los módulos de seguimiento de personal, documentos, operación y evaluaciones; constancias y solicitudes de cobertura en PDF con hoja membretada; inventario de uniformes con entradas, salidas y conciliación; listas de verificación; evaluaciones de paramédicos, 360°, desempeño, RH y NOM-035 (guías I, II y III) con calificación automática; bitácora de cambios.
 
 **Mejoras:**
+- Directorio del personal activo con búsqueda, filtros por área, empresa y sede, enlaces de correo y teléfono, y cumpleaños del mes.
+- Organigrama que se arma solo con el "Número de empleado del jefe inmediato" del padrón: niveles plegables, conteo de personas a cargo, búsqueda que ubica a la persona y lista de quienes aún no tienen jefe registrado.
+- Importación de la versión anterior (empleados, solicitudes y vacantes) con revisión previa y sin duplicados.
+- **Plataformas**: un solo lugar para abrir todas las herramientas del grupo (CCE 2.0, Portal de Evaluaciones de Desempeño, BPH-360, IPIP-NEO-120, NOM-035, evaluaciones prehospitalarias, Bolsa de Trabajo, checador, gafetes, Registros de Enfermería, Mantenimiento, Calidad Hospitalaria, Catálogo CPT, NEXOSalud y más), agrupadas por categoría y por público. Las principales aparecen como accesos rápidos en Inicio.
+- Diseño con la línea visual de CCE 2.0 y BPH-360: azul marino #002B49, azul #004B87, dorado #C5A059 y títulos en Source Serif 4; portada con banda azul marino. También en los PDF.
 - Inicio organizado como agenda: vencidos, esta semana y próximos 30 días.
 - Búsqueda global por nombre, folio o número de empleado.
 - Al registrar permisos, incapacidades, constancias y demás, se busca a la persona en el padrón y se llenan sus datos.
@@ -104,18 +114,38 @@ Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la s
 - Logotipo de Saint Luke’s Hospitals en el encabezado y crédito "Creado por RHINOBUILD" al pie de cada página. Los logotipos van incrustados en `src/Logos.html`, así que no dependen de enlaces externos.
 
 **Cambios a considerar:**
-- Arranca sin datos históricos. Los módulos de historial importado (contratos, permisos y uniformes de los archivos anteriores) no se incluyen.
+- Los datos de la intranet anterior se traen con el importador (ver abajo). Los historiales de contratos y uniformes de los archivos anteriores no se importan.
 - "911 BAYWATCH" se unificó como "911 Baywatch Ambulance", y se agregaron VIE Hospital de México, ST Josephs, Hospital Sayulita, STL Loreto, Puerto Rico CSL y Soc. Admra. y Apoyo Médico S.C. Edita `COMPANIES` en `src/Config.gs` si alguna no corresponde.
 - La hoja membretada para PDF debe ser una imagen PNG o JPG tamaño carta (Apps Script no puede usar un PDF como fondo).
 - Archivos de hasta 10 MB cada uno.
 - Google Sheets responde bien con miles de registros. Si el volumen llega a decenas de miles, conviene migrar a una base de datos.
+
+## Plataformas
+
+El catálogo base está en `src/Platforms.gs` (solo enlaces publicados y verificados). Para sumar una plataforma sin tocar el código, Dirección RH usa **Plataformas → Agregar plataforma**: nombre, enlace, categoría y para quién es. Queda con bitácora y se puede archivar después. Para quitar o cambiar una del catálogo base, edita `PLATFORMS` en `src/Platforms.gs`.
+
+## Importación de la versión anterior
+
+Solo la persona titular la ve (al final de **Usuarios y permisos**). La cuenta propietaria de la plataforma debe tener acceso a la hoja anterior.
+
+| Pestaña anterior | Va a | Cómo se traduce |
+|---|---|---|
+| Empleados | Padrón de colaboradores | ID → número de empleado; Departamento → área; ReportaA → jefe inmediato; Estatus "Baja/Inactivo" → Baja. |
+| Solicitudes | Permisos y vacaciones | Vacaciones se conserva; los demás tipos quedan como "Otro" con el tipo original al inicio del motivo. Aprobada → Autorizado, Rechazada → No autorizado. |
+| Vacantes | Cobertura de vacantes | Plazas → cantidad; Abierta y Finalistas → En reclutamiento; Pausada → Pendiente; Cubierta → Cubierta. Reciben folio CV. |
+
+- Los encabezados se reconocen sin importar acentos ni mayúsculas. Las fechas pueden venir como fecha de Sheets, `aaaa-mm-dd` o `dd/mm/aaaa`.
+- Si la sede del archivo no existe en el catálogo (por ejemplo "Puerto Rico"), se usa la sede por omisión y aparece un aviso.
+- Un número de empleado que ya existe en el padrón actual no se sobrescribe: se omite con aviso.
+- Lo que falte (fecha de ingreso, tipo de relación, etc.) queda en blanco y se pide al editar el registro.
+- Es repetible: cada registro guarda su origen y una segunda importación solo trae lo nuevo.
 
 ## Pruebas
 
 La carpeta `pruebas/` contiene un simulador de los servicios de Apps Script para Node.js:
 
 ```
-node pruebas/test.js src      # 66 comprobaciones de permisos, guardado, archivos, PDF y NOM-035
+node pruebas/test.js src      # 84 comprobaciones de permisos, guardado, archivos, PDF, NOM-035, organigrama e importación
 node pruebas/preview.js src   # vista previa local con datos ficticios en http://localhost:8765/?as=generalista@grupo-demo.mx
 ```
 

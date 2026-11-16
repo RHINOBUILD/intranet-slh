@@ -56,9 +56,16 @@ var ICONS = {
   users: 'M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM21 19v-1a4 4 0 0 0-3-3.9M16 4.1a3 3 0 0 1 0 5.8',
   left: 'M15 6l-6 6 6 6',
   right: 'M9 6l6 6-6 6',
+  down: 'M6 9l6 6 6-6',
   box: 'M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8',
   file: 'M7 3h7l5 5v13H7zM14 3v5h5',
   heart: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
+  external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  cap: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  cross: 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z',
 };
 function icon(name) {
   var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -284,10 +291,19 @@ function renderSide() {
   var side = clear(document.getElementById('side'));
   var v = S.view;
   side.appendChild(el('button', { class: 'nav-item' + (v.name === 'home' ? ' active' : ''), onclick: function () { go('home'); } }, icon('home'), 'Inicio'));
+  side.appendChild(el('button', { class: 'nav-item' + (v.name === 'platforms' ? ' active' : ''), onclick: function () { go('platforms'); } }, icon('grid'), 'Plataformas'));
   S.boot.catalog.groups.forEach(function (g) {
-    var list = mods().filter(function (m) { return m.group === g.id; });
+    var list = mods().filter(function (m) { return m.group === g.id && m.id !== 'plataformas'; });
     if (!list.length) return;
     var box = el('div', { class: 'nav-group' }, el('div', { class: 'nav-group-title' }, el('i', { style: 'background:' + groupColor(g.id) }), g.label));
+    if (g.id === 'personal' && modById('colaboradores')) {
+      [['directory', 'Directorio'], ['org', 'Organigrama']].forEach(function (pv) {
+        box.appendChild(el('button', {
+          class: 'nav-item' + (v.name === pv[0] ? ' active' : ''), 'aria-current': v.name === pv[0] ? 'page' : null,
+          onclick: function () { go(pv[0]); },
+        }, pv[1]));
+      });
+    }
     list.forEach(function (m) {
       var open = recordsOf(m.id).filter(isOpen).length;
       box.appendChild(el('button', {
@@ -318,6 +334,9 @@ function renderMain() {
   if (S.view.name === 'home') viewHome(page);
   else if (S.view.name === 'module') viewModule(page, modById(S.view.moduleId));
   else if (S.view.name === 'admin') viewAdmin(page);
+  else if (S.view.name === 'platforms') viewPlatforms(page);
+  else if (S.view.name === 'directory') viewDirectory(page);
+  else if (S.view.name === 'org') viewOrg(page);
 }
 
 /* ---------- Búsqueda global ---------- */
@@ -376,16 +395,20 @@ function viewHome(page) {
   var today = parseDay(S.boot.today);
   var hour = new Date().getHours();
   var hi = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
-  page.appendChild(el('div', { class: 'hello' }, el('div', null,
-    el('h1', { text: /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+ /.test(u.name) && u.name !== 'Dirección RH' ? hi + ', ' + u.name.split(' ')[0] : hi }),
-    el('p', { class: 'date', text: DAYS_LONG[today.getDay()] + ' ' + today.getDate() + ' de ' + MONTHS_LONG[today.getMonth()] + '. Esto es lo que requiere atención.' }))));
-
-  var quick = QUICK.filter(function (q) { var m = modById(q.kind); return m && m.canWrite; }).slice(0, 5);
-  if (quick.length) {
-    page.appendChild(el('div', { class: 'quick' }, quick.map(function (q, i) {
-      return el('button', { class: 'btn' + (i === 0 ? ' primary' : ''), onclick: function () { openNew(q.kind); } }, icon('plus'), q.label);
-    })));
-  }
+  var quick = QUICK.filter(function (q) { var m = modById(q.kind); return m && m.canWrite; }).slice(0, 4);
+  var featured = allPlatforms().filter(function (pl) { return pl.featured; }).slice(0, 6);
+  page.appendChild(el('section', { class: 'hero' },
+    el('div', { class: 'hero-main' },
+      el('div', { class: 'hero-kicker', text: 'Capital Humano · Grupo Saint Luke’s' }),
+      el('h1', { text: /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+ /.test(u.name) && u.name !== 'Dirección RH' ? hi + ', ' + u.name.split(' ')[0] + '.' : hi + '.' }),
+      el('p', { class: 'date', text: DAYS_LONG[today.getDay()].charAt(0).toUpperCase() + DAYS_LONG[today.getDay()].slice(1) + ' ' + today.getDate() + ' de ' + MONTHS_LONG[today.getMonth()] + '. Esto es lo que requiere atención hoy.' }),
+      quick.length ? el('div', { class: 'hero-actions' }, quick.map(function (q, i) {
+        return el('button', { class: 'btn ' + (i === 0 ? 'light' : 'outline-light'), onclick: function () { openNew(q.kind); } }, icon('plus'), q.label);
+      })) : null),
+    featured.length ? el('div', { class: 'hero-card' },
+      el('h2', { text: 'Accesos rápidos' }),
+      el('div', { class: 'hero-plats' }, featured.map(function (pl) { return platformTile(pl, true); })),
+      el('button', { class: 'hero-more', onclick: function () { go('platforms'); } }, 'Ver todas las plataformas', icon('right'))) : null));
 
   var open = S.data.records.filter(function (r) { return r.due && isOpen(r); });
   var lanes = [
@@ -441,6 +464,270 @@ function viewHome(page) {
   });
   split.appendChild(el('section', { class: 'panel' }, el('h2', { text: 'Actividad reciente' }), feed));
   page.appendChild(split);
+}
+
+/* ---------- Plataformas del grupo ---------- */
+
+var PLATFORM_ICONS = {
+  'Evaluación y desarrollo': 'chart', 'Capacitación': 'cap', 'Reclutamiento y selección': 'search',
+  'Asistencia y personal': 'clock', 'Operación hospitalaria': 'cross', 'Documentos y trámites': 'file',
+};
+
+/** Catálogo fijo + plataformas agregadas como registros vigentes. */
+function allPlatforms() {
+  var list = (S.boot.platforms ? S.boot.platforms.list : []).slice();
+  recordsOf('plataformas').filter(function (r) { return r.status === 'Vigente' && r.payload.url; }).forEach(function (r) {
+    list.push({ id: r.id, name: r.title, short: initials(r.title), category: r.payload.category || 'Documentos y trámites', audience: r.payload.audience || 'Capital Humano',
+      url: r.payload.url, description: r.payload.description || '', featured: false, builtIn: false, record: r });
+  });
+  return list;
+}
+
+function platformTile(pl, compact) {
+  var a = el('a', { class: 'plat' + (compact ? ' compact' : ''), href: pl.url, target: '_blank', rel: 'noopener', title: 'Abrir ' + pl.name + ' en otra pestaña' },
+    el('span', { class: 'plat-mark', 'aria-hidden': 'true', text: pl.short }),
+    el('span', { class: 'grow' },
+      el('span', { class: 'plat-name', text: pl.name }),
+      compact ? null : el('span', { class: 'plat-desc', text: pl.description }),
+      compact ? null : el('span', { class: 'plat-meta' }, el('span', { class: 'aud aud-' + norm(pl.audience).replace(/\s+/g, '-'), text: pl.audience }),
+        pl.builtIn ? null : el('span', { class: 'aud', text: 'Agregada' }))),
+    icon('external'));
+  if (!pl.builtIn && pl.record && !compact) {
+    return el('div', { class: 'plat-wrap' }, a, el('button', { class: 'btn ghost small plat-edit', onclick: function () { openRecord(pl.record); } }, 'Editar'));
+  }
+  return a;
+}
+
+function viewPlatforms(page) {
+  var addMod = modById('plataformas');
+  page.appendChild(el('div', { class: 'page-head' },
+    el('div', null,
+      el('div', { class: 'group-tag' }, el('i', { style: 'background:var(--accent)' }), 'Ecosistema RHINOBUILD · Grupo Saint Luke’s'),
+      el('h1', { text: 'Plataformas' }),
+      el('p', { class: 'lead', text: 'Todas las herramientas del grupo en un solo lugar. Cada una se abre en otra pestaña con su propio acceso.' })),
+    el('div', { class: 'actions' }, addMod && addMod.canWrite && S.boot.user.canWriteCommon
+      ? el('button', { class: 'btn primary', onclick: function () { openNew('plataformas'); } }, icon('plus'), 'Agregar plataforma') : null)));
+
+  if (!S.filters.platforms) S.filters.platforms = { q: '', audience: '' };
+  var f = S.filters.platforms;
+  var all = allPlatforms();
+  var q = el('input', { class: 'input filter-q', type: 'search', placeholder: 'Buscar plataforma', value: f.q, 'aria-label': 'Buscar plataforma' });
+  q.addEventListener('input', function () { f.q = q.value; draw(); });
+  var seg = el('div', { class: 'seg', role: 'group', 'aria-label': 'Para quién' });
+  [''].concat(S.boot.platforms.categories ? ['Capital Humano', 'Colaboradores', 'Candidatos', 'Público'] : []).forEach(function (aud) {
+    seg.appendChild(el('button', { 'aria-pressed': String(f.audience === aud), onclick: function () { f.audience = aud; renderMain(); } }, aud || 'Todas'));
+  });
+  page.appendChild(el('div', { class: 'toolbar' }, q, seg));
+  var box = el('div');
+  page.appendChild(box);
+
+  function draw() {
+    clear(box);
+    var needle = norm(f.q.trim());
+    var rows = all.filter(function (pl) {
+      if (f.audience && pl.audience !== f.audience) return false;
+      return !needle || norm([pl.name, pl.description, pl.category].join(' ')).indexOf(needle) !== -1;
+    });
+    if (!rows.length) { box.appendChild(el('div', { class: 'empty' }, el('h2', { text: 'Ninguna plataforma coincide' }), el('p', { text: 'Prueba con otra palabra o quita el filtro.' }))); return; }
+    var cats = S.boot.platforms.categories.slice();
+    rows.forEach(function (pl) { if (cats.indexOf(pl.category) === -1) cats.push(pl.category); });
+    cats.forEach(function (c) {
+      var list = rows.filter(function (pl) { return pl.category === c; });
+      if (!list.length) return;
+      box.appendChild(el('section', { class: 'plat-section' },
+        el('h2', null, icon(PLATFORM_ICONS[c] || 'file'), c, el('span', { class: 'org-count', text: list.length })),
+        el('div', { class: 'plat-grid' }, list.map(function (pl) { return platformTile(pl, false); }))));
+    });
+  }
+  draw();
+}
+
+/* ---------- Directorio y organigrama (se arman con el padrón de colaboradores) ---------- */
+
+function activePeople() {
+  return recordsOf('colaboradores').filter(function (r) { return r.status === 'Activo'; });
+}
+function initials(name) {
+  var parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  return ((parts[0] || '?').charAt(0) + (parts.length > 1 ? parts[parts.length - 1].charAt(0) : '')).toUpperCase();
+}
+function personHead(group, title, lead) {
+  return el('div', { class: 'page-head' }, el('div', null,
+    el('div', { class: 'group-tag' }, el('i', { style: 'background:' + groupColor(group) }), 'Seguimiento de personal'),
+    el('h1', { text: title }), el('p', { class: 'lead', text: lead })));
+}
+function emptyPadron(page) {
+  var m = modById('colaboradores');
+  page.appendChild(el('div', { class: 'empty' }, el('h2', { text: 'El padrón aún no tiene colaboradores activos' }),
+    el('p', { text: 'El directorio y el organigrama se llenan solos con el Padrón de colaboradores.' }),
+    m && m.canWrite ? el('button', { class: 'btn primary', onclick: function () { openNew('colaboradores'); } }, icon('plus'), m.newLabel) : null));
+}
+
+function viewDirectory(page) {
+  page.appendChild(personHead('personal', 'Directorio', 'Personal activo de las empresas y sedes que puedes consultar. Elige a una persona para ver su ficha.'));
+  var all = activePeople();
+  if (!all.length) { emptyPadron(page); return; }
+  if (!S.filters.directory) S.filters.directory = { q: '', company: '', site: '', area: '' };
+  var f = S.filters.directory;
+
+  var q = el('input', { class: 'input filter-q', type: 'search', placeholder: 'Buscar por nombre, puesto, área, correo o número', value: f.q, 'aria-label': 'Buscar en el directorio' });
+  q.addEventListener('input', function () { f.q = q.value; draw(); });
+  var areas = uniq(all.map(function (r) { return r.payload.area; }));
+  var companies = uniq(all.map(function (r) { return r.company; }));
+  var sites = uniq(all.map(function (r) { return r.site; }));
+  page.appendChild(el('div', { class: 'toolbar' }, q,
+    areas.length > 1 ? selectInput(null, f.area, function (v) { f.area = v; draw(); }, areas, 'Área') : null,
+    companies.length > 1 ? selectInput(null, f.company, function (v) { f.company = v; draw(); }, companies, 'Empresa') : null,
+    sites.length > 1 ? selectInput(null, f.site, function (v) { f.site = v; draw(); }, sites, 'Sede') : null));
+
+  // Cumpleaños del mes (solo si el rol puede ver la fecha de nacimiento)
+  var today = parseDay(S.boot.today);
+  var bdays = all.filter(function (r) { var d = parseDay(r.payload.birthDate); return d && d.getMonth() === today.getMonth(); })
+    .sort(function (a, b) { return parseDay(a.payload.birthDate).getDate() - parseDay(b.payload.birthDate).getDate(); });
+  if (bdays.length) {
+    page.appendChild(el('section', { class: 'panel bdays' },
+      el('h2', null, icon('heart'), 'Cumpleaños de ' + MONTHS_LONG[today.getMonth()]),
+      el('div', { class: 'bday-list' }, bdays.map(function (r) {
+        var d = parseDay(r.payload.birthDate).getDate();
+        return el('button', { class: 'bday' + (d === today.getDate() ? ' today' : ''), onclick: function () { openRecord(r); } },
+          el('b', { class: 'num', text: d }), el('span', { text: r.title }), d === today.getDate() ? el('em', { text: 'hoy' }) : null);
+      }))));
+  }
+
+  var grid = el('div', { class: 'people' });
+  var foot = el('p', { class: 'list-foot' });
+  page.appendChild(grid);
+  page.appendChild(foot);
+
+  function draw() {
+    clear(grid);
+    var needle = norm(f.q.trim());
+    var rows = all.filter(function (r) {
+      var p = r.payload;
+      if (f.area && p.area !== f.area) return false;
+      if (f.company && r.company !== f.company) return false;
+      if (f.site && r.site !== f.site) return false;
+      return !needle || norm([r.title, p.position, p.area, p.email, p.employeeId, p.phone].join(' ')).indexOf(needle) !== -1;
+    }).sort(function (a, b) { return a.title.localeCompare(b.title, 'es'); });
+    if (!rows.length) grid.appendChild(el('div', { class: 'empty' }, el('h2', { text: 'Nadie coincide con la búsqueda' }), el('p', { text: 'Prueba con otro nombre o quita algún filtro.' })));
+    rows.forEach(function (r) {
+      var p = r.payload;
+      grid.appendChild(el('article', { class: 'person', tabindex: '0', onclick: function () { openRecord(r); }, onkeydown: function (e) { if (e.key === 'Enter') openRecord(r); } },
+        el('div', { class: 'avatar', 'aria-hidden': 'true', text: initials(r.title) }),
+        el('div', { class: 'grow' },
+          el('div', { class: 'cell-title', text: r.title }),
+          el('div', { class: 'cell-sub', text: [p.position, p.area].filter(Boolean).join(', ') }),
+          el('div', { class: 'cell-sub', text: place(r) }),
+          el('div', { class: 'contact' },
+            p.email ? el('a', { href: 'mailto:' + p.email, onclick: function (e) { e.stopPropagation(); }, text: p.email }) : null,
+            p.phone ? el('a', { href: 'tel:' + String(p.phone).replace(/[^\d+]/g, ''), onclick: function (e) { e.stopPropagation(); }, text: p.phone }) : null))));
+    });
+    foot.textContent = rows.length + ' de ' + all.length + ' personas activas';
+  }
+  draw();
+}
+
+/** Arma el árbol: jefe por número de empleado; si no hay número, por nombre exacto. Rompe ciclos. */
+function buildOrg(people) {
+  var byId = {}, byName = {}, parent = {}, kids = {};
+  people.forEach(function (r) {
+    var id = String(r.payload.employeeId || '').toUpperCase();
+    if (id) byId[id] = r;
+    var n = norm(r.title);
+    byName[n] = byName[n] === undefined ? r : null; // nombres repetidos no se usan para enlazar
+  });
+  people.forEach(function (r) {
+    var p = r.payload, boss = null;
+    if (p.managerId) boss = byId[String(p.managerId).toUpperCase()] || null;
+    if (!boss && p.manager) boss = byName[norm(p.manager)] || null;
+    parent[r.id] = boss && boss.id !== r.id ? boss.id : null;
+  });
+  people.forEach(function (r) {
+    var seen = {}, cur = r.id, steps = 0;
+    while (parent[cur] && steps++ < people.length) {
+      if (seen[cur]) { parent[r.id] = null; break; }
+      seen[cur] = true;
+      cur = parent[cur];
+      if (cur === r.id) { parent[r.id] = null; break; }
+    }
+  });
+  people.forEach(function (r) { kids[r.id] = []; });
+  people.forEach(function (r) { if (parent[r.id]) kids[parent[r.id]].push(r); });
+  Object.keys(kids).forEach(function (k) { kids[k].sort(function (a, b) { return a.title.localeCompare(b.title, 'es'); }); });
+  var size = {};
+  function count(id) { if (size[id] !== undefined) return size[id]; size[id] = 0; var n = 0; kids[id].forEach(function (c) { n += 1 + count(c.id); }); size[id] = n; return n; }
+  people.forEach(function (r) { count(r.id); });
+  var roots = people.filter(function (r) { return !parent[r.id]; });
+  return {
+    parent: parent, kids: kids, size: size,
+    leaders: roots.filter(function (r) { return kids[r.id].length; }).sort(function (a, b) { return size[b.id] - size[a.id]; }),
+    loose: roots.filter(function (r) { return !kids[r.id].length; }).sort(function (a, b) { return a.title.localeCompare(b.title, 'es'); }),
+  };
+}
+
+function viewOrg(page) {
+  page.appendChild(personHead('personal', 'Organigrama', 'Se arma con el jefe inmediato de cada colaborador en el padrón. Para mover a alguien, edita su "Número de empleado del jefe inmediato".'));
+  var everyone = activePeople();
+  if (!everyone.length) { emptyPadron(page); return; }
+  if (!S.filters.org) S.filters.org = { q: '', company: '', open: {} };
+  var f = S.filters.org;
+  var companies = uniq(everyone.map(function (r) { return r.company; }));
+  var q = el('input', { class: 'input filter-q', type: 'search', placeholder: 'Ubicar a una persona', value: f.q, 'aria-label': 'Ubicar a una persona en el organigrama' });
+  q.addEventListener('input', function () { f.q = q.value; draw(); });
+  page.appendChild(el('div', { class: 'toolbar' }, q,
+    companies.length > 1 ? selectInput(null, f.company, function (v) { f.company = v; f.open = {}; draw(); }, companies, 'Empresa') : null,
+    el('div', { class: 'seg', role: 'group', 'aria-label': 'Niveles' },
+      el('button', { onclick: function () { Object.keys(tree.kids).forEach(function (k) { if (tree.kids[k].length) f.open[k] = true; }); draw(); } }, 'Expandir todo'),
+      el('button', { onclick: function () { Object.keys(f.open).forEach(function (k) { f.open[k] = false; }); draw(); } }, 'Contraer'))));
+  var box = el('div');
+  page.appendChild(box);
+  var tree;
+
+  function draw() {
+    clear(box);
+    var people = everyone.filter(function (r) { return !f.company || r.company === f.company; });
+    tree = buildOrg(people);
+    var needle = norm(f.q.trim());
+    var hits = {}, path = {};
+    if (needle.length >= 2) {
+      people.forEach(function (r) {
+        if (norm([r.title, r.payload.position, r.payload.employeeId].join(' ')).indexOf(needle) === -1) return;
+        hits[r.id] = true;
+        var cur = tree.parent[r.id], guard = 0;
+        while (cur && guard++ < people.length) { path[cur] = true; cur = tree.parent[cur]; }
+      });
+    }
+    function isOpenNode(r, depth) {
+      if (path[r.id]) return true;
+      if (f.open[r.id] !== undefined) return f.open[r.id];
+      return depth < 1;
+    }
+    function node(r, depth) {
+      var k = tree.kids[r.id], open = k.length && isOpenNode(r, depth), p = r.payload;
+      var li = el('li', null,
+        el('div', { class: 'org-node' + (hits[r.id] ? ' hit' : '') + (depth === 0 ? ' org-root' : '') },
+          k.length ? el('button', { class: 'icon-btn org-toggle', 'aria-expanded': String(!!open), 'aria-label': (open ? 'Contraer' : 'Expandir') + ' equipo de ' + r.title,
+            onclick: function () { f.open[r.id] = !open; draw(); } }, icon(open ? 'down' : 'right')) : el('span', { class: 'org-spacer' }),
+          el('button', { class: 'org-card', onclick: function () { openRecord(r); } },
+            el('span', { class: 'avatar small', 'aria-hidden': 'true', text: initials(r.title) }),
+            el('span', { class: 'grow' }, el('span', { class: 'cell-title', text: r.title }),
+              el('span', { class: 'cell-sub', text: [p.position, p.area].filter(Boolean).join(', ') + (f.company ? '' : ' · ' + r.company) })),
+            k.length ? el('span', { class: 'org-count', title: 'Personas a su cargo (directas e indirectas)', text: tree.size[r.id] }) : null)));
+      if (open) li.appendChild(el('ul', null, k.map(function (c) { return node(c, depth + 1); })));
+      return li;
+    }
+    if (needle.length >= 2 && !Object.keys(hits).length) box.appendChild(el('p', { class: 'notice info', text: 'Nadie coincide con "' + f.q.trim() + '".' }));
+    if (tree.leaders.length) box.appendChild(el('section', { class: 'panel org' }, el('ul', { class: 'org-tree' }, tree.leaders.map(function (r) { return node(r, 0); }))));
+    if (tree.loose.length) {
+      var looseOpen = f.open.__loose || Object.keys(hits).some(function (id) { return tree.loose.some(function (r) { return r.id === id; }); });
+      box.appendChild(el('section', { class: 'panel org' },
+        el('button', { class: 'org-loose-head', 'aria-expanded': String(!!looseOpen), onclick: function () { f.open.__loose = !looseOpen; draw(); } },
+          icon(looseOpen ? 'down' : 'right'), el('h2', { text: 'Sin jefe inmediato registrado' }), el('span', { class: 'org-count', text: tree.loose.length })),
+        looseOpen ? el('ul', { class: 'org-tree' }, tree.loose.map(function (r) { return node(r, 0); })) : null,
+        !looseOpen ? el('p', { class: 'cell-sub', text: 'Personas que no reportan a nadie del padrón y no tienen equipo a su cargo. Completa su jefe inmediato para ubicarlas.' }) : null));
+    }
+  }
+  draw();
 }
 
 /* ---------- Vista de módulo ---------- */
@@ -662,7 +949,7 @@ function exportCsv(mod) {
 function openNew(kind, preset) {
   var mod = modById(kind);
   if (!mod) return;
-  if (S.view.name !== 'module' || S.view.moduleId !== kind) go('module', kind);
+  if (!(kind === 'plataformas' && S.view.name === 'platforms') && (S.view.name !== 'module' || S.view.moduleId !== kind)) go('module', kind);
   var cat = S.boot.catalog;
   var companies = companyOptions(mod);
   var sites = siteOptions(mod);
@@ -671,6 +958,7 @@ function openNew(kind, preset) {
     owner: S.boot.user.name, due: '', notes: '', payload: {},
   };
   if (mod.id === 'constancias') { form.payload.issueDate = S.boot.today; }
+  if (mod.id === 'plataformas' && S.boot.user.canWriteCommon) { form.company = cat.allCompanies; form.site = S.boot.user.sites.indexOf('*') !== -1 ? cat.allSites : form.site; }
   if (mod.id === 'evaluaciones') { form.payload = { instrument: '', guide: '', answers: {} }; }
   Object.assign(form, preset || {});
   showDrawer({ mod: mod, rec: null, form: form, tab: 'datos', dirty: false, readOnly: false, files: [] });
@@ -680,7 +968,8 @@ function openRecord(r) {
   var mod = modById(r.kind);
   if (!mod) return;
   if (S.drawer && S.drawer.dirty && !confirm('Tienes cambios sin guardar. ¿Descartarlos?')) return;
-  if (S.view.name !== 'module' || S.view.moduleId !== r.kind) go('module', r.kind);
+  var stay = (r.kind === 'colaboradores' && (S.view.name === 'directory' || S.view.name === 'org')) || (r.kind === 'plataformas' && S.view.name === 'platforms');
+  if (!stay && (S.view.name !== 'module' || S.view.moduleId !== r.kind)) go('module', r.kind);
   showDrawer({
     mod: mod, rec: r, tab: 'datos', dirty: false, readOnly: !canWriteRecord(r), files: [],
     form: { title: r.title, company: r.company, site: r.site, status: r.status, owner: r.owner, due: r.due, notes: r.notes, payload: JSON.parse(JSON.stringify(r.payload || {})) },
@@ -801,7 +1090,7 @@ function drawForm(body, d) {
   var mod = d.mod, form = d.form, ro = d.readOnly, cat = S.boot.catalog;
 
   if (ro) body.appendChild(el('div', { class: 'notice lock', text: 'Solo lectura. Tu rol permite consultar este registro, pero no modificarlo.' }));
-  if (mod.hiddenFields && mod.hiddenFields.length) body.appendChild(el('div', { class: 'notice lock', text: 'Los datos salariales no se muestran para tu rol.' }));
+  if (mod.hiddenFields && mod.hiddenFields.length) body.appendChild(el('div', { class: 'notice lock', text: 'Algunos datos sensibles (salario o fecha de nacimiento) no se muestran para tu rol.' }));
   if (mod.id === 'incapacidades' || mod.id === 'evaluaciones') body.appendChild(el('div', { class: 'notice info', text: 'Información confidencial. Solo la ven los roles autorizados y cada consulta de archivos queda en la bitácora.' }));
 
   // Vincular con el padrón
@@ -855,6 +1144,27 @@ function drawForm(body, d) {
     clear(lhSlot).appendChild(fieldControl(field, form.payload[field.key], function (v) { form.payload[field.key] = v; }, ro));
   }
   if (mod.fields.length) body.appendChild(el('div', { class: 'section' }, el('h3', { text: 'Detalle' }), details));
+
+  // Padrón: sugerir al jefe inmediato por número de empleado y llenar su nombre
+  var bossIn = mod.id === 'colaboradores' && !ro ? details.querySelector('#f-managerId') : null;
+  if (bossIn) {
+    var dl = el('datalist', { id: 'dl-bosses' });
+    activePeople().filter(function (c) { return !d.rec || c.id !== d.rec.id; }).forEach(function (c) {
+      dl.appendChild(el('option', { value: c.payload.employeeId, label: c.title + ', ' + (c.payload.position || '') }));
+    });
+    details.appendChild(dl);
+    bossIn.setAttribute('list', 'dl-bosses');
+    bossIn.placeholder = 'Escribe nombre o número';
+    bossIn.addEventListener('change', function () {
+      var v = norm(bossIn.value.trim());
+      var boss = activePeople().filter(function (c) { return norm(c.payload.employeeId) === v || norm(c.title) === v; })[0];
+      if (!boss) return;
+      bossIn.value = form.payload.managerId = boss.payload.employeeId;
+      form.payload.manager = boss.title;
+      var nameIn = details.querySelector('#f-manager');
+      if (nameIn) nameIn.value = boss.title;
+    });
+  }
 
   if (mod.checks) body.appendChild(drawChecklist(d));
 
@@ -1328,6 +1638,66 @@ function viewAdmin(page) {
     box.appendChild(el('div', { class: 'table-wrap users' }, el('table', { class: 'list' },
       el('thead', null, el('tr', null, ['Persona', 'Rol', 'Alcance', 'Acceso'].map(function (h) { return el('th', { text: h }); }))), tbody)));
   }).catch(function (e) { clear(box).appendChild(el('p', { class: 'msg error', text: e.message })); });
+  if (S.boot.user.titular) page.appendChild(importPanel());
+}
+
+/* ---------- Importar la versión anterior (solo titular) ---------- */
+
+function importPanel() {
+  var cat = S.boot.catalog;
+  var src = el('input', { class: 'input', id: 'imp-src', type: 'url', placeholder: 'https://docs.google.com/spreadsheets/d/…' });
+  var comp = el('select', { class: 'input', id: 'imp-comp' });
+  cat.companies.forEach(function (c) { comp.appendChild(el('option', { value: c, text: c })); });
+  var site = el('select', { class: 'input', id: 'imp-site' });
+  cat.sites.forEach(function (s) { site.appendChild(el('option', { value: s, text: s, selected: s === 'San José del Cabo' })); });
+  var out = el('div', { class: 'import-out', role: 'status' });
+  var checkBtn = el('button', { class: 'btn', onclick: function () { run(false); } }, 'Revisar');
+  var LABELS = { empleados: 'Empleados → Padrón de colaboradores', solicitudes: 'Solicitudes → Permisos y vacaciones', vacantes: 'Vacantes → Cobertura de vacantes' };
+
+  function run(commit) {
+    var input = { source: src.value.trim(), company: comp.value, site: site.value, commit: commit };
+    clear(out).appendChild(el('p', { class: 'cell-sub', text: commit ? 'Importando…' : 'Revisando la hoja…' }));
+    checkBtn.disabled = true;
+    api('apiImportLegacy', input).then(function (res) {
+      checkBtn.disabled = false;
+      clear(out);
+      if (res.committed) {
+        out.appendChild(el('div', { class: 'notice info', text: 'Listo: se importaron ' + res.total + ' registros. Revisa los avisos y completa los datos que falten en cada módulo.' }));
+        reload(true);
+      } else if (!res.total) {
+        out.appendChild(el('div', { class: 'notice info', text: 'No hay registros nuevos por importar' + (Object.keys(res.summary).length ? ': todo lo de esta hoja ya está en la intranet.' : '.') }));
+      }
+      var tbody = el('tbody');
+      Object.keys(LABELS).forEach(function (k) {
+        var t = res.summary[k] || { nuevos: 0, yaImportados: 0, omitidos: 0 };
+        tbody.appendChild(el('tr', null, el('td', { text: LABELS[k] + (res.tabs[k] === null ? ' (pestaña no encontrada)' : '') }),
+          el('td', { class: 'num', text: t.nuevos }), el('td', { class: 'num', text: t.yaImportados }), el('td', { class: 'num', text: t.omitidos })));
+      });
+      out.appendChild(el('div', { class: 'table-wrap' }, el('table', { class: 'list' },
+        el('thead', null, el('tr', null, ['Pestaña', res.committed ? 'Importados' : 'Por importar', 'Ya importados', 'Omitidos'].map(function (h) { return el('th', { text: h }); }))), tbody)));
+      if (res.warnings.length) {
+        out.appendChild(el('p', { style: 'margin-top:12px;font-weight:600', text: 'Avisos (' + res.warnings.length + ')' }));
+        out.appendChild(el('ul', null, res.warnings.map(function (w) { return el('li', { text: w }); })));
+      }
+      if (!res.committed && res.total) {
+        out.appendChild(el('div', { class: 'quick', style: 'margin-top:14px' },
+          el('button', { class: 'btn primary', onclick: function (e) { e.target.disabled = true; run(true); } }, 'Importar ' + res.total + ' registros')));
+      }
+    }).catch(function (e) {
+      checkBtn.disabled = false;
+      clear(out).appendChild(el('p', { class: 'msg error', text: e.message }));
+    });
+  }
+
+  return el('section', { class: 'panel', style: 'margin-top:24px' },
+    el('h2', { text: 'Importar datos de la versión anterior' }),
+    el('p', { class: 'cell-sub', style: 'margin-bottom:12px', text: 'Trae las pestañas Empleados, Solicitudes y Vacantes de la intranet anterior. Primero se revisa sin guardar nada; puedes repetirlo sin duplicar registros. La sede del archivo se respeta cuando existe en el catálogo.' }),
+    el('div', { class: 'import-grid' },
+      el('label', { class: 'field', for: 'imp-src' }, 'Enlace de la hoja anterior', src),
+      el('label', { class: 'field', for: 'imp-comp' }, 'Empresa', comp),
+      el('label', { class: 'field', for: 'imp-site' }, 'Sede por omisión', site),
+      checkBtn),
+    out);
 }
 
 function openUser(u) {

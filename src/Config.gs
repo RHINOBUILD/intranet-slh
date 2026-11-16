@@ -75,7 +75,7 @@ const ROLE_FIELDS_ = [
   f_('reason', 'Motivo de cobertura'),
 ];
 
-const FEMININE_ = ['incapacidad', 'falta', 'constancia', 'solicitud', 'asignación', 'cobertura', 'actividad', 'capacitación',
+const FEMININE_ = ['plataforma', 'incapacidad', 'falta', 'constancia', 'solicitud', 'asignación', 'cobertura', 'actividad', 'capacitación',
   'revisión', 'renovación', 'evaluación'];
 
 function m_(o) {
@@ -113,8 +113,9 @@ const MODULES = [
     states: ['Activo', 'Baja'],
     fields: [
       f_('employeeId', 'Número único de empleado', 'text', true), f_('area', 'Área', 'text', true), f_('position', 'Puesto', 'text', true),
-      f_('manager', 'Jefe inmediato'), f_('start', 'Fecha de ingreso', 'date', true), f_('end', 'Fecha de baja', 'date'),
-      f_('email', 'Correo de contacto'),
+      f_('manager', 'Jefe inmediato'), f_('managerId', 'Número de empleado del jefe inmediato'),
+      f_('start', 'Fecha de ingreso', 'date', true), f_('end', 'Fecha de baja', 'date'),
+      f_('email', 'Correo de contacto'), f_('phone', 'Teléfono / extensión'), f_('birthDate', 'Fecha de nacimiento', 'date'),
       f_('contractType', 'Tipo de relación', 'select', true, ['Tiempo indeterminado', 'Tiempo determinado', 'Servicios profesionales', 'Prácticas']),
       f_('url', 'Carpeta del expediente', 'url'),
     ],
@@ -335,6 +336,16 @@ const MODULES = [
   }),
   docs_('evaluaciones-docs', 'Material de evaluaciones', 'comun', 'Guías y carpetas de referencia de las cinco evaluaciones.',
     [f_('type', 'Evaluación', 'select', true, ['Evaluación de paramédicos', 'Evaluación 360°', 'Evaluación de desempeño', 'Evaluación de RH', 'NOM-035'])].concat(DOC_FIELDS_)),
+  m_({
+    id: 'plataformas', label: 'Plataformas adicionales', group: 'documentos', scope: 'comun', mode: 'documentos', singular: 'plataforma',
+    titleLabel: 'Nombre de la plataforma', description: 'Plataformas que se agregan al catálogo sin modificar el código.', states: ['Vigente', 'Archivado'],
+    fields: [
+      f_('url', 'Enlace de la plataforma', 'url', true),
+      f_('category', 'Categoría', 'select', true, ['Evaluación y desarrollo', 'Capacitación', 'Reclutamiento y selección', 'Asistencia y personal', 'Operación hospitalaria', 'Documentos y trámites']),
+      f_('audience', 'Para quién es', 'select', true, ['Capital Humano', 'Colaboradores', 'Candidatos', 'Público']),
+      f_('description', 'Descripción breve', 'textarea'),
+    ],
+  }),
 ].map(function (mod) {
   if (mod.id === 'evaluaciones-docs') mod.group = 'evaluaciones';
   return mod;

@@ -38,14 +38,16 @@ function makeEnv(srcDir, ownerEmail) {
     constructor(name) { this.name = name; this.rows = []; }
     getName() { return this.name; }
     getLastRow() { let n = this.rows.length; while (n > 0 && (!this.rows[n - 1] || this.rows[n - 1].every((v) => v === '' || v === undefined))) n--; return n; }
+    getLastColumn() { return this.rows.reduce((m, r) => { let n = (r || []).length; while (n > 0 && (r[n - 1] === '' || r[n - 1] === undefined)) n--; return Math.max(m, n); }, 0); }
     getMaxRows() { return Math.max(1000, this.rows.length); }
     getRange(r, c, nr, nc) { return new Range(this, r, c, nr || 1, nc || 1); }
     deleteRow(r) { this.rows.splice(r - 1, 1); }
     setFrozenRows() {}
   }
   class Spreadsheet {
-    constructor() { this.id = 'ss-' + crypto.randomUUID(); this.sheets = [new Sheet('Hoja 1')]; }
+    constructor() { this.id = 'ss-' + crypto.randomUUID().replace(/-/g, ''); this.sheets = [new Sheet('Hoja 1')]; }
     getId() { return this.id; }
+    getSpreadsheetTimeZone() { return Intl.DateTimeFormat().resolvedOptions().timeZone; }
     getUrl() { return 'https://docs.google.com/spreadsheets/d/' + this.id; }
     getSheetByName(n) { return this.sheets.find((s) => s.name === n) || null; }
     insertSheet(n) { const s = new Sheet(n); this.sheets.push(s); return s; }
@@ -116,7 +118,7 @@ function makeEnv(srcDir, ownerEmail) {
     },
   };
   const context = vm.createContext(ctx);
-  const order = ['Config', 'Policy', 'Data', 'Nom035', 'Evaluations', 'Pdf', 'Api'];
+  const order = ['Config', 'Policy', 'Data', 'Nom035', 'Evaluations', 'Pdf', 'Api', 'Import', 'Platforms'];
   const files = fs.readdirSync(srcDir).filter((f) => f.endsWith('.gs'));
   if (files.length !== order.length) throw new Error('Archivos .gs inesperados: ' + files.join(', '));
   // Apps Script carga los archivos en un orden que no se garantiza: probamos el inverso también.

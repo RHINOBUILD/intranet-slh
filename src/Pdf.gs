@@ -20,13 +20,13 @@ function pdfShell_(record, letterhead, body) {
     '<div class="band"><div class="org">' + esc_(record.company === ALL_COMPANIES ? 'Capital Humano, Corporativo' : record.company) + '</div>' +
     '<div class="site">' + esc_(record.site) + '</div></div>';
   return '<html><head><meta charset="utf-8"><style>' +
-    '@page{size:letter;margin:0}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1D2A33;font-size:11.5pt;line-height:1.55}' +
+    '@page{size:letter;margin:0}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#1B2B3A;font-size:11.5pt;line-height:1.55}' +
     '.bg{position:fixed;top:0;left:0;width:8.5in;height:11in;z-index:-1}' +
-    '.band{background:#0E5E5B;color:#fff;padding:26px 54px}.org{font-size:17pt;font-weight:bold}.site{font-size:10.5pt;opacity:.85}' +
+    '.band{background:#002B49;color:#fff;padding:26px 54px;border-bottom:4px solid #C5A059}.org{font-size:17pt;font-weight:bold}.site{font-size:10.5pt;opacity:.85}' +
     '.page{padding:' + (letterhead ? '1.7in 0.9in 1.2in' : '0.45in 0.9in 0.9in') + '}' +
-    'h1{font-size:15pt;margin:0 0 4px}h2{font-size:12pt;margin:22px 0 6px;color:#0E5E5B}.muted{color:#5B6B73;font-size:9.5pt}' +
+    'h1{font-size:15pt;margin:0 0 4px}h2{font-size:12pt;margin:22px 0 6px;color:#004B87}.muted{color:#5B6B73;font-size:9.5pt}' +
     'table{border-collapse:collapse;width:100%;margin-top:8px}td{border-bottom:1px solid #DCE3E2;padding:5px 6px;vertical-align:top}' +
-    'td.k{width:38%;color:#5B6B73}.sign{margin-top:70px;width:300px;border-top:1px solid #1D2A33;padding-top:6px}' +
+    'td.k{width:38%;color:#5B6B73}.sign{margin-top:70px;width:300px;border-top:1px solid #1B2B3A;padding-top:6px}' +
     '.foot{margin-top:28px;font-size:8.5pt;color:#5B6B73}' +
     '</style></head><body>' + bg + header + '<div class="page">' + body + '</div></body></html>';
 }

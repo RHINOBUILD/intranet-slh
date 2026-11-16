@@ -95,6 +95,7 @@ function apiBootstrap() {
       groups: GROUPS, modules: modules,
     },
     evaluations: canAccessKind_(g, 'evaluaciones') ? evaluationCatalog_() : null,
+    platforms: { categories: PLATFORM_CATEGORIES, list: PLATFORMS },
   };
 }
 
@@ -209,6 +210,8 @@ function apiSave(input) {
       if (old && String(prior[field.key] === undefined ? '' : prior[field.key]) !== value) changed.push(field.label);
     });
 
+    if (prior.legacyKey) clean.legacyKey = prior.legacyKey; // conserva el origen de los registros importados
+
     if (clean.start && clean.end && clean.end < clean.start) fail_('La fecha de término debe ser igual o posterior a la de inicio.');
 
     if (mod.checks) {
@@ -270,6 +273,16 @@ function apiSave(input) {
         }
       });
       if (status === 'Baja' && !clean.end) fail_('Indica la fecha de baja.');
+      if (clean.managerId) {
+        clean.managerId = clean.managerId.toUpperCase();
+        if (clean.managerId === clean.employeeId) fail_('Una persona no puede ser su propio jefe inmediato.');
+        var boss = null;
+        rows.forEach(function (r) {
+          if (r.kind === 'colaboradores' && String(parsePayload_(r.payload).employeeId || '').toUpperCase() === clean.managerId) boss = r;
+        });
+        if (!boss || !permits_(g, recordOut_(boss))) fail_('El número de empleado del jefe inmediato (' + clean.managerId + ') no está en el padrón que puedes consultar.');
+        if (!clean.manager) clean.manager = boss.title;
+      }
     } else if (clean.employeeId) {
       var empId = clean.employeeId.toUpperCase();
       var emp = null;

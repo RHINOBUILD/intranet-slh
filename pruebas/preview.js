@@ -20,17 +20,24 @@ acc({ email: 'consulta@grupo-demo.mx', name: 'Óscar Medina', role: 'Consulta', 
 acc({ email: 'reclutamiento@grupo-demo.mx', name: 'Paola Ríos', role: 'Reclutamiento', companies: ['Lovalgo', 'Saint Luke’s Hospitals'], sites: ['*'] });
 const S = (o) => env.as(OWNER).call('apiSave', Object.assign({ status: '', owner: 'Mariana Torres', due: '', notes: '', payload: {} }, o));
 const SLH = 'Saint Luke’s Hospitals';
+const bday = (offset) => '19' + (80 + (offset % 15)) + day(offset).slice(4);
 const people = [
-  ['Ana Lucía Peña', 'SLH-0142', 'Enfermería', 'Enfermera general', 'San José del Cabo'],
-  ['Jorge Castillo', 'SLH-0157', 'Urgencias', 'Médico general', 'San José del Cabo'],
-  ['Valeria Núñez', 'SLH-0163', 'Laboratorio', 'Química', 'Cabo San Lucas'],
-  ['Ricardo Salas', 'SLH-0171', 'Mantenimiento', 'Técnico', 'Cabo San Lucas'],
-  ['Fernanda Ortiz', 'SLH-0188', 'Admisión', 'Recepcionista', 'San José del Cabo'],
+  ['Laura Méndez', 'SLH-0001', 'Dirección', 'Directora General', 'San José del Cabo', '', '624 142 0001', bday(12)],
+  ['Héctor Ramos', 'SLH-0010', 'Dirección Médica', 'Director Médico', 'San José del Cabo', 'SLH-0001', '624 142 0010', ''],
+  ['Daniela Ruiz', 'SLH-0020', 'Capital Humano', 'Jefa de Capital Humano', 'San José del Cabo', 'SLH-0001', '624 142 0020', bday(0)],
+  ['Sofía Aguilar', 'SLH-0030', 'Enfermería', 'Jefa de Enfermería', 'San José del Cabo', 'SLH-0010', 'Ext. 230', bday(5)],
+  ['Ana Lucía Peña', 'SLH-0142', 'Enfermería', 'Enfermera general', 'San José del Cabo', 'SLH-0030', '', ''],
+  ['Jorge Castillo', 'SLH-0157', 'Urgencias', 'Médico general', 'San José del Cabo', 'SLH-0010', '624 155 7788', ''],
+  ['Valeria Núñez', 'SLH-0163', 'Laboratorio', 'Química', 'Cabo San Lucas', 'SLH-0010', '', bday(20)],
+  ['Ricardo Salas', 'SLH-0171', 'Mantenimiento', 'Técnico', 'Cabo San Lucas', '', '', ''],
+  ['Fernanda Ortiz', 'SLH-0188', 'Admisión', 'Recepcionista', 'San José del Cabo', 'SLH-0020', 'Ext. 101', ''],
+  ['Mariana Torres', 'SLH-0190', 'Capital Humano', 'Generalista RH', 'San José del Cabo', 'SLH-0020', 'Ext. 120', ''],
 ];
 const ids = {};
 people.forEach((p, i) => {
   ids[p[1]] = S({ kind: 'colaboradores', title: p[0], company: SLH, site: p[4], status: 'Activo',
-    payload: { employeeId: p[1], area: p[2], position: p[3], start: '202' + (2 + (i % 3)) + '-0' + (i + 2) + '-15', contractType: 'Tiempo indeterminado' } });
+    payload: { employeeId: p[1], area: p[2], position: p[3], start: '20' + (12 + i) + '-0' + ((i % 9) + 1) + '-15', contractType: 'Tiempo indeterminado',
+      managerId: p[5], phone: p[6], birthDate: p[7], email: p[0].split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') + '@grupo-demo.mx' } });
 });
 S({ kind: 'contratos', title: 'Jorge Castillo', company: SLH, site: 'San José del Cabo', status: 'Por renovar',
   payload: { employeeId: 'SLH-0157', area: 'Urgencias', position: 'Médico general', type: 'Tiempo determinado', start: '2026-04-20', end: day(4) } });
@@ -57,6 +64,16 @@ S({ kind: 'especialistas', title: 'Dra. Carolina Vega', company: 'Médicos Espec
   payload: { specialty: 'Ginecología', license: '8812345', expiry: day(25) } });
 S({ kind: 'oficios', title: 'Requerimiento de información STPS', company: 'Todas las empresas', site: 'Corporativo', status: 'En seguimiento',
   payload: { direction: 'Entrada', eventDate: day(-5), sender: 'STPS', recipient: 'Capital Humano', responseDate: day(-1) } });
+
+// Hoja de la versión anterior para probar la importación
+const legacy = env.ctx.SpreadsheetApp.create();
+const lt = (name, rows) => { const sh = legacy.insertSheet(name); sh.rows = rows; };
+lt('Empleados', [['ID', 'Nombre', 'Apellido', 'Puesto', 'Departamento', 'Sede', 'Correo', 'Telefono', 'FechaIngreso', 'FechaNacimiento', 'Estatus', 'ReportaA'],
+  ['EMP-501', 'Tomás', 'Guerrero', 'Paramédico', 'Paramédico', 'Cabo San Lucas / Pioneros', 'tomas@grupo-demo.mx', '624 300 1111', '2023-02-01', '', 'Activo', 'SLH-0010'],
+  ['EMP-502', 'Elena', 'Bravo', 'Auxiliar de almacén', 'Almacén', 'Guayabitos', '', '', '', '', 'Activo', 'EMP-501']]);
+lt('Vacantes', [['ID', 'Puesto', 'Departamento', 'Sede', 'Plazas', 'Tipo', 'Descripcion', 'Estado', 'FechaPublicacion'],
+  ['VAC-9', 'Técnico Radiólogo', 'Imagen', 'Puerto Rico', 1, 'Indefinido', 'Turno nocturno', 'Abierta', day(-20)]]);
+console.log('Hoja anterior de prueba: https://docs.google.com/spreadsheets/d/' + legacy.getId() + '/edit');
 
 // ---- Servidor ----
 const shim = `<script>
