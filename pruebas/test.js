@@ -16,7 +16,8 @@ env.as(OWNER).call('instalar');
 env.as(OWNER).call('instalar'); // idempotente
 const boot = env.as(OWNER).call('apiBootstrap');
 ok(boot.state === 'ok' && boot.user.titular && boot.user.admin, 'titular');
-ok(boot.catalog.modules.length === 30, 'módulos: ' + boot.catalog.modules.length);
+ok(boot.catalog.modules.length === 31, 'módulos: ' + boot.catalog.modules.length);
+ok(boot.platforms.list.length >= 20 && boot.platforms.list.every((p) => /^https:\/\//.test(p.url) && boot.platforms.categories.includes(p.category)), 'catálogo de plataformas');
 ok(boot.evaluations && boot.evaluations.nom035.III.length === 72 && boot.evaluations.nom035.II.length === 46, 'reactivos NOM-035');
 ok(env.as('nadie@grupo.mx').call('apiBootstrap').state === 'no-access', 'sin acceso');
 

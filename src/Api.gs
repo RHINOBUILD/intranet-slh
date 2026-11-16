@@ -95,6 +95,7 @@ function apiBootstrap() {
       groups: GROUPS, modules: modules,
     },
     evaluations: canAccessKind_(g, 'evaluaciones') ? evaluationCatalog_() : null,
+    platforms: { categories: PLATFORM_CATEGORIES, list: PLATFORMS },
   };
 }
 

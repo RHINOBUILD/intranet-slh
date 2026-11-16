@@ -60,6 +60,12 @@ var ICONS = {
   box: 'M4 8l8-4 8 4v8l-8 4-8-4zM4 8l8 4 8-4M12 12v8',
   file: 'M7 3h7l5 5v13H7zM14 3v5h5',
   heart: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
+  external: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  cap: 'M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  cross: 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z',
 };
 function icon(name) {
   var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -285,8 +291,9 @@ function renderSide() {
   var side = clear(document.getElementById('side'));
   var v = S.view;
   side.appendChild(el('button', { class: 'nav-item' + (v.name === 'home' ? ' active' : ''), onclick: function () { go('home'); } }, icon('home'), 'Inicio'));
+  side.appendChild(el('button', { class: 'nav-item' + (v.name === 'platforms' ? ' active' : ''), onclick: function () { go('platforms'); } }, icon('grid'), 'Plataformas'));
   S.boot.catalog.groups.forEach(function (g) {
-    var list = mods().filter(function (m) { return m.group === g.id; });
+    var list = mods().filter(function (m) { return m.group === g.id && m.id !== 'plataformas'; });
     if (!list.length) return;
     var box = el('div', { class: 'nav-group' }, el('div', { class: 'nav-group-title' }, el('i', { style: 'background:' + groupColor(g.id) }), g.label));
     if (g.id === 'personal' && modById('colaboradores')) {
@@ -327,6 +334,7 @@ function renderMain() {
   if (S.view.name === 'home') viewHome(page);
   else if (S.view.name === 'module') viewModule(page, modById(S.view.moduleId));
   else if (S.view.name === 'admin') viewAdmin(page);
+  else if (S.view.name === 'platforms') viewPlatforms(page);
   else if (S.view.name === 'directory') viewDirectory(page);
   else if (S.view.name === 'org') viewOrg(page);
 }
@@ -387,16 +395,20 @@ function viewHome(page) {
   var today = parseDay(S.boot.today);
   var hour = new Date().getHours();
   var hi = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
-  page.appendChild(el('div', { class: 'hello' }, el('div', null,
-    el('h1', { text: /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+ /.test(u.name) && u.name !== 'Dirección RH' ? hi + ', ' + u.name.split(' ')[0] : hi }),
-    el('p', { class: 'date', text: DAYS_LONG[today.getDay()] + ' ' + today.getDate() + ' de ' + MONTHS_LONG[today.getMonth()] + '. Esto es lo que requiere atención.' }))));
-
-  var quick = QUICK.filter(function (q) { var m = modById(q.kind); return m && m.canWrite; }).slice(0, 5);
-  if (quick.length) {
-    page.appendChild(el('div', { class: 'quick' }, quick.map(function (q, i) {
-      return el('button', { class: 'btn' + (i === 0 ? ' primary' : ''), onclick: function () { openNew(q.kind); } }, icon('plus'), q.label);
-    })));
-  }
+  var quick = QUICK.filter(function (q) { var m = modById(q.kind); return m && m.canWrite; }).slice(0, 4);
+  var featured = allPlatforms().filter(function (pl) { return pl.featured; }).slice(0, 6);
+  page.appendChild(el('section', { class: 'hero' },
+    el('div', { class: 'hero-main' },
+      el('div', { class: 'hero-kicker', text: 'Capital Humano · Grupo Saint Luke’s' }),
+      el('h1', { text: /^[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+ /.test(u.name) && u.name !== 'Dirección RH' ? hi + ', ' + u.name.split(' ')[0] + '.' : hi + '.' }),
+      el('p', { class: 'date', text: DAYS_LONG[today.getDay()].charAt(0).toUpperCase() + DAYS_LONG[today.getDay()].slice(1) + ' ' + today.getDate() + ' de ' + MONTHS_LONG[today.getMonth()] + '. Esto es lo que requiere atención hoy.' }),
+      quick.length ? el('div', { class: 'hero-actions' }, quick.map(function (q, i) {
+        return el('button', { class: 'btn ' + (i === 0 ? 'light' : 'outline-light'), onclick: function () { openNew(q.kind); } }, icon('plus'), q.label);
+      })) : null),
+    featured.length ? el('div', { class: 'hero-card' },
+      el('h2', { text: 'Accesos rápidos' }),
+      el('div', { class: 'hero-plats' }, featured.map(function (pl) { return platformTile(pl, true); })),
+      el('button', { class: 'hero-more', onclick: function () { go('platforms'); } }, 'Ver todas las plataformas', icon('right'))) : null));
 
   var open = S.data.records.filter(function (r) { return r.due && isOpen(r); });
   var lanes = [
@@ -452,6 +464,82 @@ function viewHome(page) {
   });
   split.appendChild(el('section', { class: 'panel' }, el('h2', { text: 'Actividad reciente' }), feed));
   page.appendChild(split);
+}
+
+/* ---------- Plataformas del grupo ---------- */
+
+var PLATFORM_ICONS = {
+  'Evaluación y desarrollo': 'chart', 'Capacitación': 'cap', 'Reclutamiento y selección': 'search',
+  'Asistencia y personal': 'clock', 'Operación hospitalaria': 'cross', 'Documentos y trámites': 'file',
+};
+
+/** Catálogo fijo + plataformas agregadas como registros vigentes. */
+function allPlatforms() {
+  var list = (S.boot.platforms ? S.boot.platforms.list : []).slice();
+  recordsOf('plataformas').filter(function (r) { return r.status === 'Vigente' && r.payload.url; }).forEach(function (r) {
+    list.push({ id: r.id, name: r.title, short: initials(r.title), category: r.payload.category || 'Documentos y trámites', audience: r.payload.audience || 'Capital Humano',
+      url: r.payload.url, description: r.payload.description || '', featured: false, builtIn: false, record: r });
+  });
+  return list;
+}
+
+function platformTile(pl, compact) {
+  var a = el('a', { class: 'plat' + (compact ? ' compact' : ''), href: pl.url, target: '_blank', rel: 'noopener', title: 'Abrir ' + pl.name + ' en otra pestaña' },
+    el('span', { class: 'plat-mark', 'aria-hidden': 'true', text: pl.short }),
+    el('span', { class: 'grow' },
+      el('span', { class: 'plat-name', text: pl.name }),
+      compact ? null : el('span', { class: 'plat-desc', text: pl.description }),
+      compact ? null : el('span', { class: 'plat-meta' }, el('span', { class: 'aud aud-' + norm(pl.audience).replace(/\s+/g, '-'), text: pl.audience }),
+        pl.builtIn ? null : el('span', { class: 'aud', text: 'Agregada' }))),
+    icon('external'));
+  if (!pl.builtIn && pl.record && !compact) {
+    return el('div', { class: 'plat-wrap' }, a, el('button', { class: 'btn ghost small plat-edit', onclick: function () { openRecord(pl.record); } }, 'Editar'));
+  }
+  return a;
+}
+
+function viewPlatforms(page) {
+  var addMod = modById('plataformas');
+  page.appendChild(el('div', { class: 'page-head' },
+    el('div', null,
+      el('div', { class: 'group-tag' }, el('i', { style: 'background:var(--accent)' }), 'Ecosistema RHINOBUILD · Grupo Saint Luke’s'),
+      el('h1', { text: 'Plataformas' }),
+      el('p', { class: 'lead', text: 'Todas las herramientas del grupo en un solo lugar. Cada una se abre en otra pestaña con su propio acceso.' })),
+    el('div', { class: 'actions' }, addMod && addMod.canWrite && S.boot.user.canWriteCommon
+      ? el('button', { class: 'btn primary', onclick: function () { openNew('plataformas'); } }, icon('plus'), 'Agregar plataforma') : null)));
+
+  if (!S.filters.platforms) S.filters.platforms = { q: '', audience: '' };
+  var f = S.filters.platforms;
+  var all = allPlatforms();
+  var q = el('input', { class: 'input filter-q', type: 'search', placeholder: 'Buscar plataforma', value: f.q, 'aria-label': 'Buscar plataforma' });
+  q.addEventListener('input', function () { f.q = q.value; draw(); });
+  var seg = el('div', { class: 'seg', role: 'group', 'aria-label': 'Para quién' });
+  [''].concat(S.boot.platforms.categories ? ['Capital Humano', 'Colaboradores', 'Candidatos', 'Público'] : []).forEach(function (aud) {
+    seg.appendChild(el('button', { 'aria-pressed': String(f.audience === aud), onclick: function () { f.audience = aud; renderMain(); } }, aud || 'Todas'));
+  });
+  page.appendChild(el('div', { class: 'toolbar' }, q, seg));
+  var box = el('div');
+  page.appendChild(box);
+
+  function draw() {
+    clear(box);
+    var needle = norm(f.q.trim());
+    var rows = all.filter(function (pl) {
+      if (f.audience && pl.audience !== f.audience) return false;
+      return !needle || norm([pl.name, pl.description, pl.category].join(' ')).indexOf(needle) !== -1;
+    });
+    if (!rows.length) { box.appendChild(el('div', { class: 'empty' }, el('h2', { text: 'Ninguna plataforma coincide' }), el('p', { text: 'Prueba con otra palabra o quita el filtro.' }))); return; }
+    var cats = S.boot.platforms.categories.slice();
+    rows.forEach(function (pl) { if (cats.indexOf(pl.category) === -1) cats.push(pl.category); });
+    cats.forEach(function (c) {
+      var list = rows.filter(function (pl) { return pl.category === c; });
+      if (!list.length) return;
+      box.appendChild(el('section', { class: 'plat-section' },
+        el('h2', null, icon(PLATFORM_ICONS[c] || 'file'), c, el('span', { class: 'org-count', text: list.length })),
+        el('div', { class: 'plat-grid' }, list.map(function (pl) { return platformTile(pl, false); }))));
+    });
+  }
+  draw();
 }
 
 /* ---------- Directorio y organigrama (se arman con el padrón de colaboradores) ---------- */
@@ -861,7 +949,7 @@ function exportCsv(mod) {
 function openNew(kind, preset) {
   var mod = modById(kind);
   if (!mod) return;
-  if (S.view.name !== 'module' || S.view.moduleId !== kind) go('module', kind);
+  if (!(kind === 'plataformas' && S.view.name === 'platforms') && (S.view.name !== 'module' || S.view.moduleId !== kind)) go('module', kind);
   var cat = S.boot.catalog;
   var companies = companyOptions(mod);
   var sites = siteOptions(mod);
@@ -870,6 +958,7 @@ function openNew(kind, preset) {
     owner: S.boot.user.name, due: '', notes: '', payload: {},
   };
   if (mod.id === 'constancias') { form.payload.issueDate = S.boot.today; }
+  if (mod.id === 'plataformas' && S.boot.user.canWriteCommon) { form.company = cat.allCompanies; form.site = S.boot.user.sites.indexOf('*') !== -1 ? cat.allSites : form.site; }
   if (mod.id === 'evaluaciones') { form.payload = { instrument: '', guide: '', answers: {} }; }
   Object.assign(form, preset || {});
   showDrawer({ mod: mod, rec: null, form: form, tab: 'datos', dirty: false, readOnly: false, files: [] });
@@ -879,7 +968,7 @@ function openRecord(r) {
   var mod = modById(r.kind);
   if (!mod) return;
   if (S.drawer && S.drawer.dirty && !confirm('Tienes cambios sin guardar. ¿Descartarlos?')) return;
-  var stay = r.kind === 'colaboradores' && (S.view.name === 'directory' || S.view.name === 'org');
+  var stay = (r.kind === 'colaboradores' && (S.view.name === 'directory' || S.view.name === 'org')) || (r.kind === 'plataformas' && S.view.name === 'platforms');
   if (!stay && (S.view.name !== 'module' || S.view.moduleId !== r.kind)) go('module', r.kind);
   showDrawer({
     mod: mod, rec: r, tab: 'datos', dirty: false, readOnly: !canWriteRecord(r), files: [],

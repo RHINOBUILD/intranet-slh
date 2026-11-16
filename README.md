@@ -4,9 +4,9 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 
 ![Pantalla de inicio con datos ficticios](docs/vista-previa.png)
 
-| Directorio | Organigrama |
-|---|---|
-| ![Directorio](docs/directorio.png) | ![Organigrama](docs/organigrama.png) |
+| Plataformas | Directorio | Organigrama |
+|---|---|---|
+| ![Plataformas](docs/plataformas.png) | ![Directorio](docs/directorio.png) | ![Organigrama](docs/organigrama.png) |
 
 > GitHub guarda el código; la plataforma **no se ejecuta en GitHub Pages**. Funciona como aplicación web de Google Apps Script, así que se instala en Google siguiendo los pasos de abajo.
 
@@ -30,7 +30,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 2. En **Configuración del proyecto** (ícono de engrane), activa **Mostrar el archivo de manifiesto "appsscript.json" en el editor**.
 3. En el editor, abre `appsscript.json` y reemplaza su contenido por el de `src/appsscript.json`.
 4. Borra el archivo `Código.gs` y crea estos archivos con el botón **+**, usando exactamente estos nombres. El editor agrega la extensión solo.
-   - **Secuencia de comandos:** `Config`, `Policy`, `Data`, `Nom035`, `Evaluations`, `Pdf`, `Api`, `Import`
+   - **Secuencia de comandos:** `Config`, `Policy`, `Data`, `Nom035`, `Evaluations`, `Pdf`, `Api`, `Import`, `Platforms`
    - **HTML:** `Index`, `Styles`, `Logos`, `Client`
 
    Pega en cada uno el contenido del archivo con el mismo nombre de la carpeta `src/`. El orden no importa.
@@ -99,7 +99,8 @@ Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la s
 - Directorio del personal activo con búsqueda, filtros por área, empresa y sede, enlaces de correo y teléfono, y cumpleaños del mes.
 - Organigrama que se arma solo con el "Número de empleado del jefe inmediato" del padrón: niveles plegables, conteo de personas a cargo, búsqueda que ubica a la persona y lista de quienes aún no tienen jefe registrado.
 - Importación de la versión anterior (empleados, solicitudes y vacantes) con revisión previa y sin duplicados.
-- Identidad institucional azul marino y dorado, también en los PDF.
+- **Plataformas**: un solo lugar para abrir todas las herramientas del grupo (CCE 2.0, Portal de Evaluaciones de Desempeño, BPH-360, IPIP-NEO-120, NOM-035, evaluaciones prehospitalarias, Bolsa de Trabajo, checador, gafetes, Registros de Enfermería, Mantenimiento, Calidad Hospitalaria, Catálogo CPT, NEXOSalud y más), agrupadas por categoría y por público. Las principales aparecen como accesos rápidos en Inicio.
+- Diseño con la línea visual de CCE 2.0 y BPH-360: azul marino #002B49, azul #004B87, dorado #C5A059 y títulos en Source Serif 4; portada con banda azul marino. También en los PDF.
 - Inicio organizado como agenda: vencidos, esta semana y próximos 30 días.
 - Búsqueda global por nombre, folio o número de empleado.
 - Al registrar permisos, incapacidades, constancias y demás, se busca a la persona en el padrón y se llenan sus datos.
@@ -118,6 +119,10 @@ Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la s
 - La hoja membretada para PDF debe ser una imagen PNG o JPG tamaño carta (Apps Script no puede usar un PDF como fondo).
 - Archivos de hasta 10 MB cada uno.
 - Google Sheets responde bien con miles de registros. Si el volumen llega a decenas de miles, conviene migrar a una base de datos.
+
+## Plataformas
+
+El catálogo base está en `src/Platforms.gs` (solo enlaces publicados y verificados). Para sumar una plataforma sin tocar el código, Dirección RH usa **Plataformas → Agregar plataforma**: nombre, enlace, categoría y para quién es. Queda con bitácora y se puede archivar después. Para quitar o cambiar una del catálogo base, edita `PLATFORMS` en `src/Platforms.gs`.
 
 ## Importación de la versión anterior
 
