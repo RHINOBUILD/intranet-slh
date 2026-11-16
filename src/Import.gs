@@ -23,8 +23,10 @@ function legacyId_(v) {
 }
 
 /** Fecha de la hoja anterior → yyyy-MM-dd ('' si no se reconoce). */
+var LEGACY_TZ_ = ''; // zona horaria de la hoja anterior: Sheets entrega las fechas a medianoche en esa zona
+
 function legacyDate_(v) {
-  if (v instanceof Date) return isNaN(v.getTime()) ? '' : Utilities.formatDate(v, APP_TZ, 'yyyy-MM-dd');
+  if (v instanceof Date) return isNaN(v.getTime()) ? '' : Utilities.formatDate(v, LEGACY_TZ_ || APP_TZ, 'yyyy-MM-dd');
   var s = String(v || '').trim();
   var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (m) return m[1] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[3]).slice(-2);
@@ -109,6 +111,7 @@ function apiImportLegacy(input) {
     } catch (e) {
       fail_('No pude abrir esa hoja. Revisa el enlace y que la cuenta propietaria de la plataforma tenga acceso a ella.');
     }
+    try { LEGACY_TZ_ = src.getSpreadsheetTimeZone() || APP_TZ; } catch (e) { LEGACY_TZ_ = APP_TZ; }
     var tabs = {};
     Object.keys(LEGACY_TABS_).forEach(function (k) { tabs[k] = legacyRows_(src, LEGACY_TABS_[k]); });
     if (!tabs.empleados && !tabs.solicitudes && !tabs.vacantes) fail_('La hoja no tiene pestañas "Empleados", "Solicitudes" ni "Vacantes".');

@@ -47,6 +47,7 @@ function makeEnv(srcDir, ownerEmail) {
   class Spreadsheet {
     constructor() { this.id = 'ss-' + crypto.randomUUID().replace(/-/g, ''); this.sheets = [new Sheet('Hoja 1')]; }
     getId() { return this.id; }
+    getSpreadsheetTimeZone() { return Intl.DateTimeFormat().resolvedOptions().timeZone; }
     getUrl() { return 'https://docs.google.com/spreadsheets/d/' + this.id; }
     getSheetByName(n) { return this.sheets.find((s) => s.name === n) || null; }
     insertSheet(n) { const s = new Sheet(n); this.sheets.push(s); return s; }
