@@ -17,7 +17,7 @@ env.as(OWNER).call('instalar'); // idempotente
 const boot = env.as(OWNER).call('apiBootstrap');
 ok(boot.state === 'ok' && boot.user.titular && boot.user.admin, 'titular');
 ok(boot.catalog.modules.length === 31, 'módulos: ' + boot.catalog.modules.length);
-ok(boot.platforms.list.length >= 20 && boot.platforms.list.every((p) => /^https:\/\//.test(p.url) && boot.platforms.categories.includes(p.category)), 'catálogo de plataformas');
+ok(boot.platforms.list.length === 0 && boot.platforms.categories.length === 6, 'catálogo base vacío: plataformas solo manuales');
 ok(boot.evaluations && boot.evaluations.nom035.III.length === 72 && boot.evaluations.nom035.II.length === 46, 'reactivos NOM-035');
 ok(env.as('nadie@grupo.mx').call('apiBootstrap').state === 'no-access', 'sin acceso');
 
@@ -235,6 +235,17 @@ rec(OWNER, { kind: 'colaboradores', id: pablo.id, revision: pablo.revision, titl
 const again = imp(OWNER, { commit: true });
 ok(again.total === 0 && again.summary.empleados.yaImportados === 3 && again.summary.vacantes.yaImportados === 2, 'reimportar no duplica');
 
+// --- Equipo de Capital Humano
+throws(() => env.as('gen@grupo.mx').call('cargarEquipoCH'), /titular/, 'solo el titular carga al equipo');
+const antes = env.as(OWNER).call('apiAccessList').users.length;
+env.as(OWNER).call('cargarEquipoCH');
+env.as(OWNER).call('cargarEquipoCH'); // repetible
+const usuarios = env.as(OWNER).call('apiAccessList').users;
+ok(usuarios.length === antes + 5, 'equipo CH: 5 accesos sin duplicar');
+ok(!usuarios.some((u) => /joselyn/i.test(u.name)), 'sin Joselyn');
+ok(env.as('capitalhumanocsl@saintlukeshospitals.com').call('apiBootstrap').user.role === 'Jefatura RH', 'CSL entra como Jefatura RH');
+ok(env.as('capitalhumano@saintlukeshospitals.com').call('apiBootstrap').user.role === 'Reclutamiento', 'reclutadora entra');
+
 // --- doGet arma la página completa
 const vm = require('vm');
 const html = vm.runInContext('doGet().getContent()', env.ctx);
@@ -246,5 +257,5 @@ fs.readdirSync(SRC).filter((f) => f.endsWith('.gs')).forEach((f) => {
   const code = fs.readFileSync(SRC + '/' + f, 'utf8');
   for (const m of code.matchAll(/^function\s+([A-Za-z0-9_]+)/gm)) if (!m[1].endsWith('_')) publicFns.push(m[1]);
 });
-ok(publicFns.every((f) => f === 'doGet' || f === 'instalar' || f.startsWith('api')), 'públicas: ' + publicFns.join(', '));
+ok(publicFns.every((f) => f === 'doGet' || f === 'instalar' || f === 'cargarEquipoCH' || f.startsWith('api')), 'públicas: ' + publicFns.join(', '));
 console.log(n + ' comprobaciones aprobadas');
