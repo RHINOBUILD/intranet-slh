@@ -15,7 +15,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 | Carpeta | Contenido |
 |---|---|
 | `src/` | Los archivos que van a Apps Script (`.gs`, `.html` y `appsscript.json`). |
-| `pruebas/` | Simulador de Apps Script para Node.js, 84 comprobaciones y vista previa local. |
+| `pruebas/` | Simulador de Apps Script para Node.js, 90 comprobaciones y vista previa local. |
 | `docs/` | Capturas. |
 | `.github/workflows/` | Corre las pruebas automáticamente en cada cambio. |
 
@@ -30,7 +30,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
 2. En **Configuración del proyecto** (ícono de engrane), activa **Mostrar el archivo de manifiesto "appsscript.json" en el editor**.
 3. En el editor, abre `appsscript.json` y reemplaza su contenido por el de `src/appsscript.json`.
 4. Borra el archivo `Código.gs` y crea estos archivos con el botón **+**, usando exactamente estos nombres. El editor agrega la extensión solo.
-   - **Secuencia de comandos:** `Config`, `Policy`, `Data`, `Nom035`, `Evaluations`, `Pdf`, `Api`, `Import`, `Platforms`
+   - **Secuencia de comandos:** `Config`, `Policy`, `Data`, `Nom035`, `Evaluations`, `Pdf`, `Api`, `Import`, `Platforms`, `Team`
    - **HTML:** `Index`, `Styles`, `Logos`, `Client`
 
    Pega en cada uno el contenido del archivo con el mismo nombre de la carpeta `src/`. El orden no importa.
@@ -41,7 +41,7 @@ Versión de la intranet de Capital Humano construida como web app de Google Apps
    - Ejecutar como: **Yo**
    - Quién tiene acceso: **Cualquier usuario de [tu dominio]**
 7. Copia la URL de la aplicación web y ábrela. Entras como titular (Dirección RH, todas las empresas y sedes).
-8. En **Usuarios y permisos**, agrega al equipo con su correo corporativo, rol, empresas y sedes.
+8. Da de alta al equipo de Capital Humano: en el editor elige la función **cargarEquipoCH** y pulsa **Ejecutar** (ver "Equipo de Capital Humano" abajo). Para cualquier otra persona, usa **Usuarios y permisos** con su correo corporativo, rol, empresas y sedes.
 9. (Opcional) En la misma pantalla, en **Importar datos de la versión anterior**, pega el enlace de la hoja de la intranet anterior (pestañas Empleados, Solicitudes y Vacantes), elige empresa y sede por omisión y pulsa **Revisar**. Verás cuántos registros entran y los avisos; si todo está bien, pulsa **Importar**. Ver "Importación" abajo.
 
 ### Alternativa: instalar con clasp
@@ -99,8 +99,8 @@ Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la s
 - Directorio del personal activo con búsqueda, filtros por área, empresa y sede, enlaces de correo y teléfono, y cumpleaños del mes.
 - Organigrama que se arma solo con el "Número de empleado del jefe inmediato" del padrón: niveles plegables, conteo de personas a cargo, búsqueda que ubica a la persona y lista de quienes aún no tienen jefe registrado.
 - Importación de la versión anterior (empleados, solicitudes y vacantes) con revisión previa y sin duplicados.
-- **Plataformas**: un solo lugar para abrir todas las herramientas del grupo (CCE 2.0, Portal de Evaluaciones de Desempeño, BPH-360, IPIP-NEO-120, NOM-035, evaluaciones prehospitalarias, Bolsa de Trabajo, checador, gafetes, Registros de Enfermería, Mantenimiento, Calidad Hospitalaria, Catálogo CPT, NEXOSalud y más), agrupadas por categoría y por público. Las principales aparecen como accesos rápidos en Inicio.
-- Diseño con la línea visual de CCE 2.0 y BPH-360: azul marino #002B49, azul #004B87, dorado #C5A059 y títulos en Source Serif 4; portada con banda azul marino. También en los PDF.
+- **Plataformas**: un solo lugar para abrir las herramientas del grupo, agrupadas por categoría y por público. Se agregan a mano desde la intranet y las que se marquen aparecen como accesos rápidos en Inicio.
+- Diseño con la línea visual de CCE 2.0 y BPH-360: azul marino #002B49, azul #004B87, azul cielo #29ABE2 (colores del logotipo de Saint Luke’s) y títulos en Source Serif 4; portada con banda azul marino. También en los PDF.
 - Inicio organizado como agenda: vencidos, esta semana y próximos 30 días.
 - Búsqueda global por nombre, folio o número de empleado.
 - Al registrar permisos, incapacidades, constancias y demás, se busca a la persona en el padrón y se llenan sus datos.
@@ -122,7 +122,21 @@ Las sedes "Caribe", "Vallarta" y "Nayarit" agrupan otras sedes. Quien tiene la s
 
 ## Plataformas
 
-El catálogo base está en `src/Platforms.gs` (solo enlaces publicados y verificados). Para sumar una plataforma sin tocar el código, Dirección RH usa **Plataformas → Agregar plataforma**: nombre, enlace, categoría y para quién es. Queda con bitácora y se puede archivar después. Para quitar o cambiar una del catálogo base, edita `PLATFORMS` en `src/Platforms.gs`.
+La sección empieza vacía. Dirección RH agrega cada plataforma desde **Plataformas → Agregar plataforma**: nombre, enlace, categoría, para quién es y si se muestra en **Accesos rápidos de Inicio**. Queda con bitácora; para quitarla, se edita y se cambia a **Archivado**. `PLATFORMS` en `src/Platforms.gs` está vacío a propósito; solo se usa si algún día quieres una plataforma fija en el código.
+
+## Equipo de Capital Humano
+
+`src/Team.gs` contiene al equipo con su acceso. La persona titular ejecuta una vez **cargarEquipoCH** desde el editor; es repetible y actualiza a quien ya exista sin duplicar. Después, cualquier ajuste se hace en **Usuarios y permisos**.
+
+| Persona | Correo | Rol | Sede |
+|---|---|---|---|
+| Jeymy Tahide Domínguez Olachea | generalistarrhh@ | Jefatura RH | San José del Cabo |
+| Ximena Tapia Bedolla | auxrrhh@ | Generalista RH | San José del Cabo |
+| Andrés Heriberto Luque Durán | capacitaciones@ | Capacitación | San José del Cabo |
+| Abigail Ponce López | capitalhumano@ | Reclutamiento | San José del Cabo |
+| Akane Reyes / Elvira Hilario | capitalhumanocsl@ (compartida) | Jefatura RH | Cabo San Lucas |
+
+Todos con acceso a todas las empresas de su sede y sin permiso para administrar accesos. Los correos son @saintlukeshospitals.com.
 
 ## Importación de la versión anterior
 
@@ -145,7 +159,7 @@ Solo la persona titular la ve (al final de **Usuarios y permisos**). La cuenta p
 La carpeta `pruebas/` contiene un simulador de los servicios de Apps Script para Node.js:
 
 ```
-node pruebas/test.js src      # 84 comprobaciones de permisos, guardado, archivos, PDF, NOM-035, organigrama e importación
+node pruebas/test.js src      # 90 comprobaciones de permisos, guardado, archivos, PDF, NOM-035, organigrama e importación
 node pruebas/preview.js src   # vista previa local con datos ficticios en http://localhost:8765/?as=generalista@grupo-demo.mx
 ```
 

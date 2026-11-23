@@ -337,13 +337,14 @@ const MODULES = [
   docs_('evaluaciones-docs', 'Material de evaluaciones', 'comun', 'Guías y carpetas de referencia de las cinco evaluaciones.',
     [f_('type', 'Evaluación', 'select', true, ['Evaluación de paramédicos', 'Evaluación 360°', 'Evaluación de desempeño', 'Evaluación de RH', 'NOM-035'])].concat(DOC_FIELDS_)),
   m_({
-    id: 'plataformas', label: 'Plataformas adicionales', group: 'documentos', scope: 'comun', mode: 'documentos', singular: 'plataforma',
-    titleLabel: 'Nombre de la plataforma', description: 'Plataformas que se agregan al catálogo sin modificar el código.', states: ['Vigente', 'Archivado'],
+    id: 'plataformas', label: 'Plataformas', group: 'documentos', scope: 'comun', mode: 'documentos', singular: 'plataforma',
+    titleLabel: 'Nombre de la plataforma', description: 'Plataformas del grupo que se abren desde la intranet. Se agregan, editan y archivan aquí.', states: ['Vigente', 'Archivado'],
     fields: [
       f_('url', 'Enlace de la plataforma', 'url', true),
       f_('category', 'Categoría', 'select', true, ['Evaluación y desarrollo', 'Capacitación', 'Reclutamiento y selección', 'Asistencia y personal', 'Operación hospitalaria', 'Documentos y trámites']),
       f_('audience', 'Para quién es', 'select', true, ['Capital Humano', 'Colaboradores', 'Candidatos', 'Público']),
       f_('description', 'Descripción breve', 'textarea'),
+      f_('featured', 'Mostrar en Accesos rápidos de Inicio', 'select', false, ['No', 'Sí']),
     ],
   }),
 ].map(function (mod) {

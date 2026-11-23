@@ -478,7 +478,7 @@ function allPlatforms() {
   var list = (S.boot.platforms ? S.boot.platforms.list : []).slice();
   recordsOf('plataformas').filter(function (r) { return r.status === 'Vigente' && r.payload.url; }).forEach(function (r) {
     list.push({ id: r.id, name: r.title, short: initials(r.title), category: r.payload.category || 'Documentos y trámites', audience: r.payload.audience || 'Capital Humano',
-      url: r.payload.url, description: r.payload.description || '', featured: false, builtIn: false, record: r });
+      url: r.payload.url, description: r.payload.description || '', featured: r.payload.featured === 'Sí', builtIn: false, record: r });
   });
   return list;
 }
@@ -504,7 +504,7 @@ function viewPlatforms(page) {
     el('div', null,
       el('div', { class: 'group-tag' }, el('i', { style: 'background:var(--accent)' }), 'Ecosistema RHINOBUILD · Grupo Saint Luke’s'),
       el('h1', { text: 'Plataformas' }),
-      el('p', { class: 'lead', text: 'Todas las herramientas del grupo en un solo lugar. Cada una se abre en otra pestaña con su propio acceso.' })),
+      el('p', { class: 'lead', text: 'Las herramientas del grupo en un solo lugar. Cada una se abre en otra pestaña con su propio acceso. Marca "Mostrar en Accesos rápidos de Inicio" para tenerla a la mano.' })),
     el('div', { class: 'actions' }, addMod && addMod.canWrite && S.boot.user.canWriteCommon
       ? el('button', { class: 'btn primary', onclick: function () { openNew('plataformas'); } }, icon('plus'), 'Agregar plataforma') : null)));
 
@@ -528,6 +528,12 @@ function viewPlatforms(page) {
       if (f.audience && pl.audience !== f.audience) return false;
       return !needle || norm([pl.name, pl.description, pl.category].join(' ')).indexOf(needle) !== -1;
     });
+    if (!all.length) {
+      var canAdd = addMod && addMod.canWrite && S.boot.user.canWriteCommon;
+      box.appendChild(el('div', { class: 'empty' }, el('h2', { text: 'Aún no hay plataformas' }),
+        el('p', { text: canAdd ? 'Agrega la primera con el botón "Agregar plataforma": nombre, enlace, categoría y para quién es.' : 'Capital Humano todavía no ha agregado plataformas.' })));
+      return;
+    }
     if (!rows.length) { box.appendChild(el('div', { class: 'empty' }, el('h2', { text: 'Ninguna plataforma coincide' }), el('p', { text: 'Prueba con otra palabra o quita el filtro.' }))); return; }
     var cats = S.boot.platforms.categories.slice();
     rows.forEach(function (pl) { if (cats.indexOf(pl.category) === -1) cats.push(pl.category); });

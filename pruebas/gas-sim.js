@@ -118,7 +118,7 @@ function makeEnv(srcDir, ownerEmail) {
     },
   };
   const context = vm.createContext(ctx);
-  const order = ['Config', 'Policy', 'Data', 'Nom035', 'Evaluations', 'Pdf', 'Api', 'Import', 'Platforms'];
+  const order = ['Config', 'Policy', 'Data', 'Nom035', 'Evaluations', 'Pdf', 'Api', 'Import', 'Platforms', 'Team'];
   const files = fs.readdirSync(srcDir).filter((f) => f.endsWith('.gs'));
   if (files.length !== order.length) throw new Error('Archivos .gs inesperados: ' + files.join(', '));
   // Apps Script carga los archivos en un orden que no se garantiza: probamos el inverso también.
